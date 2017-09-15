@@ -1,9 +1,4 @@
-local Entity = {}
-Entity.__index = Entity
-
-function Entity.new(t)
-  return setmetatable(t, Entity)
-end
+local Entity = Object:extend()
 
 function Entity:init(...)
   if self.onInit then self:onInit(...) end

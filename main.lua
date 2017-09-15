@@ -4,12 +4,12 @@
 love.filesystem.setRequirePath('?.lua;src/?.lua;')
 
 -- 3rd party libraries
-Camera   = require 'lib/camera'
-Behavior = require 'lib/behavior'
-Event    = require 'lib/signal'
-lume     = require 'lib/lume'
-Object = require 'classic'
-timer    = require 'lib/timer'
+Camera   = require 'lib.camera'
+Behavior = require 'lib.behavior'
+Event    = require 'lib.signal'
+lume     = require 'lib.lume'
+Object   = require 'lib.classic'
+timer    = require 'lib.timer'
 tiny     = require 'lib.tiny'
 
 -- Starkiller modules
