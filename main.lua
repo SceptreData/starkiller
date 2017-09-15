@@ -17,10 +17,9 @@ local fs = love.filesystem
 local lg = love.graphics
 
 local IMG_PATH = 'img/'
-local AUDIO_PATH = 'audio/'
+local SND_PATH = 'snd/'
 
 local assets = {}
-
 
 function love.load()
   love.window.setTitle('Starkiller')
