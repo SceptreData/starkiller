@@ -7,7 +7,8 @@ love.filesystem.setRequirePath('?.lua;src/?.lua;')
 Camera   = require 'lib.camera'
 Class    = require 'lib.middleclass'
 Behavior = require 'lib.behavior'
---Event    = require 'lib.signal'
+Bump     = require 'lib.bump'
+--Event  = require 'lib.signal'
 Timer    = require 'lib.timer'
 
 -- Starkiller modules
@@ -48,4 +49,3 @@ function love.keypressed(key)
     love.event.quit()
   end
 end
-
