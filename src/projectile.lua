@@ -3,7 +3,7 @@ local Entity = require 'entity'
 local Projectile = Class('Projectile', Entity)
 
 local BULLET_SIZE = 32
-local BULLET_SPEED = 600
+local BULLET_SPEED = 10
 
 local bullet_img = love.graphics.newImage('img/bullet.png')
 
@@ -12,6 +12,7 @@ function Projectile:initialize(parent, origin, target)
   self.parent = parent
   self.vel = (target - origin) * BULLET_SPEED
   self.lifetime = 0
+  table.insert(Game.bullets, self)
 end
 
 
@@ -24,7 +25,7 @@ function Projectile:update(dt)
     local col = cols[i]
     if col.other ~= self.parent then
       self:remove()
-      return
+      return true
     end
   end
 
@@ -34,7 +35,7 @@ end
 
 function Projectile:draw()
   local centre = self:getCentre()
-  love.graphics.draw(bullet_img, centre.x, centre.y)
+  love.graphics.draw(bullet_img, centre.x, centre.y, 0, 1, 1, 16, 16)
 end
 
 return Projectile

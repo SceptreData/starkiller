@@ -44,10 +44,8 @@ end
 
 
 function Hero:fireWeapon(x, y)
-  local origin = self:getCentre()
-  print(origin)
-  local b = Projectile:new(self, self:getCentre(), Vec2(x, y))
-  table.insert(Game.bullets, b)
+  local origin = self:getCentre() + self.ori * LINE_SIZE
+  local b = Projectile:new(self, origin, Vec2(x, y))
 end
 
 

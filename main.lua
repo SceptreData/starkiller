@@ -73,6 +73,7 @@ end
 function love.draw()
   lg.clear(113, 102, 117) -- RUM GREY
 
+  lg.setColor(255, 255, 255)
   player:draw()
   drawBullets()
   drawBlocks()
@@ -101,8 +102,9 @@ function drawBullets()
 end
 
 function updateBullets(dt)
-  for _, b in ipairs(Game.bullets) do
-    b:update(dt)
+  for idx, b in ipairs(Game.bullets) do
+    dead = b:update(dt)
+    if dead then table.remove(Game.bullets, idx) end
   end
 end
 
