@@ -33,6 +33,8 @@ local SCREEN_H = 768
 
 -- Globals (GASP)
 Game = {}
+Game.bullets = {}
+
 local blocks = {}
 local player
 
@@ -43,6 +45,10 @@ function love.load()
   
   local icon_img = lg.newImage('img/icon.png')
   love.window.setIcon(icon_img:getData())
+
+  local cursor_img = lg.newImage('img/cursor.png')
+  local cursor     = love.mouse.newCursor(cursor_img:getData(), 15, 15)
+  love.mouse.setCursor(cursor)
 
   lg.setDefaultFilter('nearest', 'nearest')
   lg.setBackgroundColor(0, 0, 0)
@@ -60,6 +66,7 @@ end
 
 function love.update(dt)
   player:update(dt)
+  updateBullets(dt)
 end
 
 
@@ -67,6 +74,7 @@ function love.draw()
   lg.clear(113, 102, 117) -- RUM GREY
 
   player:draw()
+  drawBullets()
   drawBlocks()
 
   lg.setColor(255, 255, 255)
@@ -74,9 +82,27 @@ function love.draw()
 end
 
 
+function love.mousepressed(x, y, button)
+  if button == 1 then
+    player:fireWeapon(x, y)
+  end
+end
+
 function love.keypressed(key)
   if key == 'escape' then
     love.event.quit()
+  end
+end
+
+function drawBullets()
+  for _, b in ipairs(Game.bullets) do
+    b:draw()
+  end
+end
+
+function updateBullets(dt)
+  for _, b in ipairs(Game.bullets) do
+    b:update(dt)
   end
 end
 

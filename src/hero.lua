@@ -1,15 +1,19 @@
-local Entity  = require 'entity'
-local util    = require 'util'
+local Entity      = require 'entity'
+local Projectile  = require 'projectile'
+local util        = require 'util'
 
 local getColor = util.getColor
 
 local Hero = Class('Hero', Entity)
 
 local HERO_SIZE         = 32
-local HERO_MAX_SPEED    = 500
+local HERO_MAX_SPEED    = 300
 local HERO_ACCEL_SPEED  = 100
-local HERO_BRAKE_SPEED  = 500
+local HERO_BRAKE_SPEED  = 300
 local HERO_COLOR        = {0, 255, 0} -- GREEN
+
+local LINE_SIZE         = HERO_SIZE
+
 
 
 function Hero:initialize(x, y)
@@ -17,11 +21,17 @@ function Hero:initialize(x, y)
   self.health = 10
   self.isDead = false
   self.vel    = Vec2(0,0)
-  self.ori    = 0
+  self.ori    = Vec2()
 end
 
 
 function Hero:update(dt)
+  -- Point our gun towards the mouse
+  local mouse_pos =  Vec2(love.mouse.getX(), love.mouse.getY())
+  self.ori = (mouse_pos - self.pos):normalize()
+  
+  -- Get input to move our hero
+  -- TODO: Rewrite all this crap so friction works properly.
   self:getVelocityInput(dt)
   self.vel:setMag(HERO_MAX_SPEED * dt)
 
@@ -33,11 +43,19 @@ function Hero:update(dt)
 end
 
 
+function Hero:fireWeapon(x, y)
+  local origin = self:getCentre()
+  print(origin)
+  local b = Projectile:new(self, self:getCentre(), Vec2(x, y))
+  table.insert(Game.bullets, b)
+end
+
+
 function Hero:getVelocityInput(dt)
   if self.isDead then return end
 
   local vx, vy = self.vel.x, self.vel.y
-
+  
   if love.keyboard.isDown('left', 'a') then
     vx = vx - dt * (vx > 0 and HERO_BRAKE_SPEED or HERO_ACCEL_SPEED)
   elseif love.keyboard.isDown('right', 'd') then
@@ -68,11 +86,19 @@ function Hero:getVelocityInput(dt)
 end
 
 function Hero:draw()
+  -- Draw filled rectangle
   local r, g, b = getColor(HERO_COLOR)
   love.graphics.setColor(r, g, b, 100)
   love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
   love.graphics.setColor(r, g, b)
   love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+
+  -- Draw line towards mouse
+  local centre = self:getCentre()
+  local line_end = centre + self.ori * LINE_SIZE
+  love.graphics.setLineWidth(2)
+  love.graphics.line(centre.x, centre.y, line_end.x, line_end.y)
+  love.graphics.setLineWidth(1)
 end
 
 return Hero

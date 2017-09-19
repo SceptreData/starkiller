@@ -10,6 +10,7 @@ function Entity:initialize(x, y, w, h)
   
   -- Add Entity to the physical world
   Game.world:add(self, x, y, w, h)
+  print('adding', self)
   self.created_at = love.timer.getTime()
 end
 
