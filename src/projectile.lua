@@ -31,6 +31,9 @@ function Projectile:update(dt)
   for i=1, n_cols do
     local col = cols[i]
     if col.other ~= self.parent then
+      if col.other.isEnemy then
+        col.other:takeDamage(1)
+      end
       self:remove()
       return true
     end

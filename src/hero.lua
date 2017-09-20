@@ -24,7 +24,7 @@ function Hero:initialize(x, y)
   self.ori    = Vec2()
 end
 
-heroFilter = function(hero, other)
+local heroFilter = function(hero, other)
   if other.parent == hero then return nil
   else
     return 'slide'
@@ -84,7 +84,7 @@ function Hero:update(dt)
 
   local cols, n_cols
   if not self.vel:isZero() then
-    dest = self.pos + self.vel
+    local dest = self.pos + self.vel
     self.pos.x, self.pos.y, cols, n_cols = Game.world:move(self, dest.x, dest.y, heroFilter)
   end
 end

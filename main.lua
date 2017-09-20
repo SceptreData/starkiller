@@ -16,6 +16,7 @@ Vec2  = require 'vec2'
 
 -- Non-Global Modules
 local Hero = require 'hero'
+local Enemy = require 'enemy'
 local util = require 'util'
 
 
@@ -34,9 +35,11 @@ local SCREEN_H = 768
 -- Globals (GASP)
 Game = {}
 Game.bullets = {}
+Game.ents = {}
 
 local blocks = {}
 local player
+local foe
 
 function love.load()
   -- Set up Window
@@ -61,11 +64,13 @@ function love.load()
   newBlock(1024-32, 32, 32,     768-32*2)
   newBlock(0, 768-32, 1024, 32)
   player = Hero:new(SCREEN_W/2, SCREEN_H/2)
+  foe = Enemy:new(player.pos.x, player.pos.y - 200)
 end
 
 
 function love.update(dt)
   player:update(dt)
+  updateEnts(dt)
   updateBullets(dt)
 end
 
@@ -75,9 +80,11 @@ function love.draw()
   lg.clear(113, 102, 117) -- RUM GREY
 
   player:draw()
+  drawEnts()
   drawBullets()
   drawBlocks()
 
+  lg.setColor(255, 255, 255, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
 end
 
@@ -94,11 +101,28 @@ function love.keypressed(key)
   end
 end
 
+
+function drawEnts()
+  for _, e in ipairs(Game.ents) do
+    e:draw()
+  end
+end
+
+
+function updateEnts(dt)
+  for idx, e in ipairs(Game.ents) do
+    dead = e:update(dt)
+    if dead then table.remove(Game.ents, idx) end
+  end
+end
+
+
 function drawBullets()
   for _, b in ipairs(Game.bullets) do
     b:draw()
   end
 end
+
 
 function updateBullets(dt)
   for idx, b in ipairs(Game.bullets) do
@@ -112,6 +136,8 @@ function newBlock(x,y,w,h)
     blocks[#blocks+1] = b
     Game.world:add(b, x, y, w, h)
 end
+
+
 
 function drawBlocks()
   for _, b in ipairs(blocks) do
