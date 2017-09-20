@@ -71,14 +71,13 @@ end
 
 
 function love.draw()
+  lg.setColor(255, 255, 255, 255)
   lg.clear(113, 102, 117) -- RUM GREY
 
-  lg.setColor(255, 255, 255)
   player:draw()
   drawBullets()
   drawBlocks()
 
-  lg.setColor(255, 255, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
 end
 

@@ -15,36 +15,24 @@ local HERO_COLOR        = {0, 255, 0} -- GREEN
 local LINE_SIZE         = HERO_SIZE
 
 
-
 function Hero:initialize(x, y)
   Entity.initialize(self, x, y, HERO_SIZE, HERO_SIZE)
+  self.isHero = true
   self.health = 10
   self.isDead = false
   self.vel    = Vec2(0,0)
   self.ori    = Vec2()
 end
 
-
-function Hero:update(dt)
-  -- Point our gun towards the mouse
-  local mouse_pos =  Vec2(love.mouse.getX(), love.mouse.getY())
-  self.ori = (mouse_pos - self.pos):normalize()
-  
-  -- Get input to move our hero
-  -- TODO: Rewrite all this crap so friction works properly.
-  self:getVelocityInput(dt)
-  self.vel:setMag(HERO_MAX_SPEED * dt)
-
-  local cols, n_cols
-  if not self.vel:isZero() then
-    dest = self.pos + self.vel
-    self.pos.x, self.pos.y, cols, n_cols = Game.world:move(self, dest.x, dest.y)
+heroFilter = function(hero, other)
+  if other.parent == hero then return nil
+  else
+    return 'slide'
   end
 end
 
-
 function Hero:fireWeapon(x, y)
-  local origin = self:getCentre() + self.ori * LINE_SIZE
+  local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
   local b = Projectile:new(self, origin, Vec2(x, y))
 end
 
@@ -82,6 +70,26 @@ function Hero:getVelocityInput(dt)
 
   self.vel.x, self.vel.y = vx, vy
 end
+
+
+function Hero:update(dt)
+  -- Point our gun towards the mouse
+  local mouse_pos =  Vec2(love.mouse.getX(), love.mouse.getY())
+  self.ori = (mouse_pos - self.pos):normalize()
+  
+  -- Get input to move our hero
+  -- TODO: Rewrite all this crap so friction works properly.
+  self:getVelocityInput(dt)
+  self.vel:setMag(HERO_MAX_SPEED * dt)
+
+  local cols, n_cols
+  if not self.vel:isZero() then
+    dest = self.pos + self.vel
+    self.pos.x, self.pos.y, cols, n_cols = Game.world:move(self, dest.x, dest.y, heroFilter)
+  end
+end
+
+
 
 function Hero:draw()
   -- Draw filled rectangle
