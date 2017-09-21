@@ -63,8 +63,11 @@ function love.load()
   newBlock(0, 32, 32,     768-32*2)
   newBlock(1024-32, 32, 32,     768-32*2)
   newBlock(0, 768-32, 1024, 32)
+
   player = Hero:new(SCREEN_W/2, SCREEN_H/2)
-  foe = Enemy:new(player.pos.x, player.pos.y - 200)
+  Game.player = player
+
+  foe = Enemy:new(player.pos.x, player.pos.y - 300)
 end
 
 

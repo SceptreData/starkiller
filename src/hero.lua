@@ -18,10 +18,14 @@ local LINE_SIZE         = HERO_SIZE
 function Hero:initialize(x, y)
   Entity.initialize(self, x, y, HERO_SIZE, HERO_SIZE)
   self.isHero = true
+
   self.health = 10
   self.isDead = false
+
   self.vel    = Vec2(0,0)
   self.ori    = Vec2()
+
+  Game.player = self
 end
 
 local heroFilter = function(hero, other)
