@@ -49,6 +49,7 @@ function love.load()
 
   -- Init Camera
   camera = Gamera.new(0, 0, game_w, game_h)
+  Game.camera = camera
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -88,7 +89,8 @@ end
 
 function love.mousepressed(x, y, button)
   if button == 1 then
-    player:fireWeapon(x, y)
+    local tx, ty = camera:toWorld(x, y)
+    player:fireWeapon(tx, ty)
   end
 end
 

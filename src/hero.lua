@@ -37,7 +37,7 @@ end
 
 function Hero:fireWeapon(x, y)
   local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
-  local b = Projectile:new(self, origin, Vec2(x, y))
+  Projectile:new(self, origin, Vec2(x, y))
 end
 
 
@@ -78,8 +78,8 @@ end
 
 function Hero:update(dt)
   -- Point our gun towards the mouse
-  local mouse_pos =  Vec2(love.mouse.getX(), love.mouse.getY())
-  self.ori = (mouse_pos - self.pos):normalize()
+  local tx, ty = Game.camera:toWorld(love.mouse.getX(), love.mouse.getY())
+  self.ori = (Vec2(tx, ty) - self.pos):normalize()
   
   -- Get input to move our hero
   -- TODO: Rewrite all this crap so friction works properly.
