@@ -13,12 +13,16 @@ local ARRIVE_RADIUS = 50
 
 local BLUE = {0, 0, 255}
 
+
 function Enemy:initialize(x, y)
   Entity.initialize(self, x, y, ENEMY_SIZE, ENEMY_SIZE)
   self.isEnemy = true
 
   self.state = 'idle'
   self.behaviors = {'seek'}
+
+  self.img  = assets.xeno
+  self.anim = Game.xenoIdle
 
   self.health = 2
   self.isDead = false
@@ -29,7 +33,6 @@ function Enemy:initialize(x, y)
   self.max_speed = MAX_SPEED
   self.vel = Vec2()
   self.ori = Vec2()
-  table.insert(Game.ents, self)
 end
 
 
@@ -93,6 +96,9 @@ end
 
 
 function Enemy:update(dt)
+
+  self.anim:update(dt)
+
   if self.health < 1 or self.isDead then
     self:remove()
     return true
@@ -125,11 +131,14 @@ end
 
 
 function Enemy:draw()
-  local r, g, b = util.getColor(BLUE)
-  love.graphics.setColor(r, g, b, 100)
-  love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
-  love.graphics.setColor(r, g, b)
-  love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+  -- local r, g, b = util.getColor(BLUE)
+  -- love.graphics.setColor(r, g, b, 100)
+  -- love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
+  -- love.graphics.setColor(r, g, b)
+  -- love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+
+  love.graphics.setColor(255,255,255,255)
+  self.anim:draw(self.img, self.pos.x, self.pos.y)
 end
 
 return Enemy

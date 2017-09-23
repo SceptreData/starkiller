@@ -4,6 +4,7 @@
 love.filesystem.setRequirePath('?.lua;src/?.lua;')
 
 -- 3rd party libraries
+Anim8    = require 'lib.anim8'
 Class    = require 'lib.middleclass'
 Behavior = require 'lib.behavior'
 Bump     = require 'lib.bump'
@@ -26,7 +27,7 @@ local lg = love.graphics
 local IMG_PATH = 'img/'
 local SND_PATH = 'snd/'
 
-local assets = {}
+assets = {}
 
 local SCREEN_W = 1024
 local SCREEN_H = 768
@@ -35,8 +36,6 @@ local CELL_SIZE = 32
 
 -- Globals (GASP)
 Game = {}
-Game.bullets = {}
-Game.ents = {}
 
 local blocks = {}
 local player, foe
@@ -45,11 +44,13 @@ local camera, map
 local game_w, game_h = 1000, 1000
 
 function love.load()
+  loadMedia()
   initWindow()
 
   -- Init Camera
   camera = Gamera.new(0, 0, game_w, game_h)
   Game.camera = camera
+  --camera:setScale(1.5)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -107,13 +108,11 @@ function initWindow()
   love.window.setTitle('Starkiller')
   fs.setIdentity('Starkiller')
 
-  -- Set Window icon 
-  local icon_img = lg.newImage('img/icon.png')
-  love.window.setIcon(icon_img:getData())
+  -- Set Icon
+  love.window.setIcon(assets.icon:getData())
  
   -- Set Cursor
-  local cursor_img = lg.newImage('img/cursor.png')
-  local cursor     = love.mouse.newCursor(cursor_img:getData(), 15, 15)
+  local cursor     = love.mouse.newCursor(assets.cursor:getData(), 15, 15)
   love.mouse.setCursor(cursor)
 
   -- Screen defaults
@@ -121,3 +120,22 @@ function initWindow()
   lg.setBackgroundColor(255, 255, 255)
   lg.clear()
 end
+
+
+function buildAnim(asset, row, col, dur)
+  local g = Anim8.newGrid(32, 32, asset:getWidth(), asset:getHeight(), 0, 0, 2)
+  local animation = Anim8.newAnimation(g(row, col), dur)
+  return animation
+end
+
+
+function loadMedia()
+  assets.icon    = lg.newImage('img/icon.png')
+  assets.cursor  = lg.newImage('img/cursor.png')
+  assets.hero    = lg.newImage('img/tom.png')
+  assets.xeno    = lg.newImage('img/xeno.png')
+
+  Game.xenoIdle  = buildAnim(assets.xeno, '1-2', 1, 0.09)
+  Game.heroIdle  = buildAnim(assets.hero, '1-3', 1, 0.1)
+end
+

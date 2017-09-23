@@ -19,6 +19,9 @@ function Hero:initialize(x, y)
   Entity.initialize(self, x, y, HERO_SIZE, HERO_SIZE)
   self.isHero = true
 
+  self.img  = assets.hero
+  self.anim = Game.heroIdle
+
   self.health = 10
   self.isDead = false
 
@@ -80,6 +83,8 @@ function Hero:update(dt)
   -- Point our gun towards the mouse
   local tx, ty = Game.camera:toWorld(love.mouse.getX(), love.mouse.getY())
   self.ori = (Vec2(tx, ty) - self.pos):normalize()
+
+  self.anim:update(dt)
   
   -- Get input to move our hero
   -- TODO: Rewrite all this crap so friction works properly.
@@ -97,11 +102,16 @@ end
 
 function Hero:draw()
   -- Draw filled rectangle
-  local r, g, b = getColor(HERO_COLOR)
-  love.graphics.setColor(r, g, b, 100)
-  love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
-  love.graphics.setColor(r, g, b)
-  love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+  if DEBUG_MODE then
+    local r, g, b = getColor(HERO_COLOR)
+    love.graphics.setColor(r, g, b, 100)
+    love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
+    love.graphics.setColor(r, g, b)
+    love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+  end
+
+  love.graphics.setColor(255, 255, 255, 255)
+  self.anim:draw(self.img, self.pos.x, self.pos.y)
 
   -- Draw line towards mouse
   local centre = self:getCentre()
