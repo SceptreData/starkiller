@@ -12,6 +12,8 @@ local HERO_ACCEL_SPEED  = 100
 local HERO_BRAKE_SPEED  = 300
 local HERO_COLOR        = {0, 255, 0} -- GREEN
 
+local HERO_ACC          = 0.95
+
 local LINE_SIZE         = HERO_SIZE
 
 
@@ -38,9 +40,11 @@ local heroFilter = function(hero, other)
   end
 end
 
-function Hero:fireWeapon(x, y)
+function Hero:fireWeapon(tx, ty)
   local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
-  Projectile:new(self, origin, Vec2(x, y))
+  Projectile:new(self, origin, Vec2(tx, ty), HERO_ACC)
+  love.timer.sleep(0.015)
+  Game.camera:shake(0.8)
 end
 
 

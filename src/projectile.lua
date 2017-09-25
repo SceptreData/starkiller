@@ -1,5 +1,8 @@
 local Entity = require 'entity'
 
+local rand = math.random
+local floor = math.floor
+
 local Projectile = Class('Projectile', Entity)
 
 local BULLET_SIZE = 26
@@ -7,9 +10,20 @@ local BULLET_SPEED = 500
 
 local bullet_img = love.graphics.newImage('img/bullet.png')
 
-function Projectile:initialize(parent, origin, target)
+
+local function adjustForAccuracy(target, acc)
+  return Vec2(
+    floor(rand(target.x * acc, target.x * (1 + (1 - acc)))),
+    floor(rand(target.y * acc, target.y * (1 + (1 - acc))))
+  )
+end
+
+function Projectile:initialize(parent, origin, target, accuracy)
   Entity.initialize(self, origin.x, origin.y, BULLET_SIZE, BULLET_SIZE)
   self.parent = parent
+
+  local accuracy = accuracy or 1
+  local target = adjustForAccuracy(target, accuracy)
   self.vel = (target - origin):normalize() * BULLET_SPEED
   self.lifetime = 0
   self.isBullet = true

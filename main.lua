@@ -8,11 +8,13 @@ Anim8    = require 'lib.anim8'
 Class    = require 'lib.middleclass'
 Behavior = require 'lib.behavior'
 Bump     = require 'lib.bump'
-Gamera   = require 'lib.gamera'
+--Gamera   = require 'lib.gamera'
 --Event  = require 'lib.signal'
 Timer    = require 'lib.timer'
 
 -- Global Starkiller modules
+BSP = require 'bsp'
+CloverCam = require 'clovercam'
 Vec2  = require 'vec2'
 
 -- Non-Global Modules
@@ -43,12 +45,23 @@ local camera, map
 
 local game_w, game_h = 1000, 1000
 
+--BSP STUFF
+local MAP_SIZE = 50
+local SQUARE = 1024 / MAP_SIZE
+local N_ITER = 4
+
+DEBUG_MODE = true
+
+local bsp, bspTree
+
 function love.load()
+  lg.setDefaultFilter('nearest', 'nearest')
+
   loadMedia()
   initWindow()
 
   -- Init Camera
-  camera = Gamera.new(0, 0, game_w, game_h)
+  camera = CloverCam(0, 0, game_w, game_h, 5)
   Game.camera = camera
   --camera:setScale(1.5)
 
@@ -60,6 +73,10 @@ function love.load()
   player = Hero:new(SCREEN_W/2, SCREEN_H/2)
   Game.player = player
   foe = Enemy:new(player.pos.x, player.pos.y - 300)
+
+  -- Temp BSP stuff
+   bsp = BSP.new(0, 0, 1024, 768)
+   bspTree = bsp:split(N_ITER)
 end
 
 
@@ -70,7 +87,8 @@ function love.update(dt)
 
   -- Centre camera on player, update camera
   local pos = player:getCentre()
-  camera:setPosition(pos.x, pos.y)
+  camera:set(pos.x, pos.y)
+  camera:update(dt)
 end
 
 
@@ -82,6 +100,8 @@ function love.draw()
   camera:draw(function(x, y, w, h)
     map:draw(x, y, w, h)
   end)
+
+  BSP.drawTree(bspTree)
   
   lg.setColor(255, 255, 255, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
@@ -116,14 +136,14 @@ function initWindow()
   love.mouse.setCursor(cursor)
 
   -- Screen defaults
-  lg.setDefaultFilter('nearest', 'nearest')
   lg.setBackgroundColor(255, 255, 255)
   lg.clear()
 end
 
 
 function buildAnim(asset, row, col, dur)
-  local g = Anim8.newGrid(32, 32, asset:getWidth(), asset:getHeight(), 0, 0, 2)
+  local w, h = asset:getDimensions()
+  local g = Anim8.newGrid(32, 32, w, h)
   local animation = Anim8.newAnimation(g(row, col), dur)
   return animation
 end
@@ -135,7 +155,6 @@ function loadMedia()
   assets.hero    = lg.newImage('img/tom.png')
   assets.xeno    = lg.newImage('img/xeno.png')
 
-  Game.xenoIdle  = buildAnim(assets.xeno, '1-2', 1, 0.09)
+  Game.xenoIdle  = buildAnim(assets.xeno, '1-2', 1, 0.08)
   Game.heroIdle  = buildAnim(assets.hero, '1-3', 1, 0.1)
 end
-

@@ -10,6 +10,7 @@ local MAX_SPEED = 5
 local ACQUIRE_DIST = 300
 local ATTACK_RANGE = 200
 local ARRIVE_RADIUS = 50
+local ENEMY_ACC = 0.95
 
 local BLUE = {0, 0, 255}
 
@@ -28,7 +29,7 @@ function Enemy:initialize(x, y)
   self.isDead = false
 
   self.attackTimer    = 0
-  self.attackCooldown = 3
+  self.attackCooldown = 2
 
   self.max_speed = MAX_SPEED
   self.vel = Vec2()
@@ -55,7 +56,7 @@ end
 function Enemy:fireAt(target, dt)
   if self.attackTimer == 0 then
     local origin = self:getCentre()
-    local b = Projectile:new(self, origin, target:getCentre())
+    local b = Projectile:new(self, origin, target:getCentre(), ENEMY_ACC)
     self.attackTimer = self.attackTimer + dt
   else
     if self.attackTimer >= self.attackCooldown then
