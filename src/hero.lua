@@ -16,6 +16,7 @@ local HERO_ACC          = 0.95
 
 local LINE_SIZE         = HERO_SIZE
 
+local pistol_fx = love.sound.newSoundData('snd/pistol.wav')
 
 function Hero:initialize(x, y)
   Entity.initialize(self, x, y, HERO_SIZE, HERO_SIZE)
@@ -43,6 +44,7 @@ end
 function Hero:fireWeapon(tx, ty)
   local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
   Projectile:new(self, origin, Vec2(tx, ty), HERO_ACC)
+  love.audio.newSource(pistol_fx):play()
   love.timer.sleep(0.025)
   Game.camera:shake(0.8)
 end
