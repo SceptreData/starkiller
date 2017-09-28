@@ -60,11 +60,20 @@ function util.sign(x)
 end
 
 
+-- lume func
 function util.rand(a, b)
   if not a then a, b = 0, 1 end
   if not b then b = 0 end
   return a + random() * (b - a)
 end
+
+function util.rectIntersects(a, b)
+  return (a.x <= b.x + b.w and
+          b.x <= a.x + a.w and
+          a.y <= b.y + b.h and
+          b.y <= a.y + a.h)
+end
+
 
 
 function util.printkv(t)

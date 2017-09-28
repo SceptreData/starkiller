@@ -52,6 +52,7 @@ local N_ITER = 4
 
 
 DEBUG_MODE = true
+SOUND_ENABLED = false
 
 local bsp, bspTree
 
@@ -60,6 +61,8 @@ function love.load()
 
   loadMedia()
   initWindow()
+
+  --math.randomseed(os.time())
 
   -- Init Camera
   camera = CloverCam(0, 0, game_w, game_h, 5)
@@ -75,13 +78,8 @@ function love.load()
   Game.player = player
   foe = Enemy:new(player.pos.x, player.pos.y - 300)
 
-  -- Temp BSP stuff
-   bsp = BSP.new(0, 0, 1024, 768)
-
-   bspTree = bsp:split(N_ITER)
-
-   local leaves = bspTree:getLeaves()
-   BSP.buildRooms(bspTree, N_ITER + 1)
+  bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
+  BSP.buildRooms(bsp)
 end
 
 
@@ -105,7 +103,9 @@ function love.draw()
     map:draw(x, y, w, h)
   end)
 
-  BSP.drawTree(bspTree)
+  BSP.drawPaths(bsp)
+  --BSP.cheatPath(bsp)
+  BSP.drawTree(bsp)
   
   lg.setColor(255, 255, 255, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)

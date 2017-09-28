@@ -10,8 +10,8 @@ local function randomInt(min, max)
 end
 
 
-local BSP_Box = {}
-BSP_Box.__index = BSP_Box
+local BSP = {}
+BSP.__index = BSP
 
 local DISCARD_BY_RATIO = true
 local W_RATIO = 0.45
@@ -24,7 +24,7 @@ local function newBox(x, y, w, h)
     w = w,
     h = h,
     centre = Vec2(x + (w/2), y + (h/2))
-  }, BSP_Box)
+  }, BSP)
 end
 
 
@@ -63,35 +63,20 @@ local function randomSplit(box)
 end
 
 
-function BSP_Box.drawTree(t)
-  t.data:draw()
-  if t.children[1] ~= nil then
-    BSP_Box.drawTree(t.children[1])
-  end
-  if t.children[2] ~= nil then
-    BSP_Box.drawTree(t.children[2])
-  end
-end
 
-function BSP_Box.buildRooms(t, lvl)
-  local ends = t:getLevel(lvl)
+function BSP.buildRooms(tree, lvl)
+  local lvl = lvl or tree.levels
+  local ends = tree:getLevel(lvl)
   for _, v in ipairs(ends) do v.data:newRoom() end
-
-  -- local left, right = t.children[1], t.children[2]
-  -- if left ~= nil then
-  --   BSP_Box.buildRooms(left)
-  -- end
-  -- if right ~= nil then
-  --   BSP_Box.buildRooms(right)
-  -- end
-end
+  end
 
 
--- Build a tree of BSP_Boxes!
-function BSP_Box:split(iter, child)
+-- Build a tree of BSPes!
+function BSP:split(iter, child)
   local root = Tree(self)
+  if not child then root.levels = iter + 1 end
   if iter ~= 0 then
-    -- Randomly Split our root.
+    -- Randomly Split our root, add it to tree
     local left, right = randomSplit(self)
     root.children[1] = left:split(iter - 1, true)
     root.children[2] = right:split(iter - 1, true)
@@ -100,7 +85,7 @@ function BSP_Box:split(iter, child)
 end
 
 
-function BSP_Box:newRoom()
+function BSP:newRoom()
   local room = {}
   room.x = self.x + randomInt(0, floor(self.w/3))
   room.y = self.y + randomInt(0, floor(self.h/3))
@@ -113,23 +98,92 @@ function BSP_Box:newRoom()
   self.room = room
 end
 
-function BSP_Box:setRatio(w, h)
+function drawPath(start, dest, width)
+  local old_w = love.graphics.getLineWidth()
+  love.graphics.setLineWidth(width or 64)
+
+  love.graphics.setColor(0, 255, 0)
+  love.graphics.line(start.centre.x, (start.centre.y),
+                     dest.centre.x, dest.centre.y
+                    )
+  love.graphics.setLineWidth(old_w)
+end
+
+function BSP.bresenPath(x0, y0, x1, y1, w)
+  local width = w or 1
+
+  local dx, dy = math.abs(x1 - x0), -math.abs(y1 - y0)
+  local sx = x0 < x1 and width or -width 
+  local sy = y0 < y1 and width or -width
+  local err = dx + dy
+  local e2
+
+  while x0 ~= x1 and y0 ~= y1 do
+    setTile(x0,y0)
+    e2 = 2 * err
+
+    if e2 >= dy then
+      err = err + dy
+      x0 = x0 + sx
+    end
+
+    if e2 <= dx then
+      err = err + dx
+      y0 = y0 + sy
+    end
+  end
+end
+
+
+function BSP:setRatio(w, h)
   W_RATIO = w or 0.45
   H_RATIO = h or 0.45
 end
 
 
-function BSP_Box:draw()
-  util.hollowRect({0, 0, 255}, self.x, self.y, self.w, self.h)
-  if self.room then
-    local r = self.room
+local function drawBox(box)
+  util.hollowRect({0, 0, 255}, box.x, box.y, box.w, box.h)
+  if box.room then
+    local r = box.room
     util.drawRect({0, 100, 0}, r.x, r.y, r.w, r.h)
+  end
+end
+
+function BSP.drawTree(t)
+  local box = t.data
+  drawBox(box)
+
+  local left, right = t.children[1], t.children[2]
+  if left then
+    BSP.drawTree(left)
+  end
+  if right then
+    BSP.drawTree(right)
+  end
+end
+
+function BSP.drawPaths(t)
+  local left, right = t.children[1], t.children[2]
+  if left and right then
+    drawPath(left.data, right.data)
+    BSP.drawPaths(left)
+    BSP.drawPaths(right)
+  end
+end
+
+
+function BSP.cheatPath(tree)
+  local ends = tree:getLeaves()-- tree:getLevel(tree.levels)
+  for i=1, #ends-1 do
+      drawPath(ends[i].data, ends[i+1].data)
   end
 end
 
 
 
+BSP.new = function(num_splits, x, y, w, h)
+  local bsp = newBox(x, y, w, h)
+  return bsp:split(num_splits)
+end
 
-BSP_Box.new = newBox
-
-return BSP_Box
+return BSP
