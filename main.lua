@@ -50,6 +50,7 @@ local MAP_SIZE = 50
 local SQUARE = 1024 / MAP_SIZE
 local N_ITER = 4
 
+
 DEBUG_MODE = true
 
 local bsp, bspTree
@@ -76,9 +77,12 @@ function love.load()
 
   -- Temp BSP stuff
    bsp = BSP.new(0, 0, 1024, 768)
-   bspTree = bsp:split(N_ITER)
-end
 
+   bspTree = bsp:split(N_ITER)
+
+   local leaves = bspTree:getLeaves()
+   BSP.buildRooms(bspTree, N_ITER + 1)
+end
 
 
 function love.update(dt)

@@ -1,4 +1,5 @@
 local Block = require 'block'
+local BSP   = require 'bsp'
 local Hero = require 'hero'
 local Enemy = require 'enemy'
 
