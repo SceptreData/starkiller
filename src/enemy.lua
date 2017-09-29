@@ -6,7 +6,7 @@ local util        = require 'util'
 local Enemy = Class('Enemy', Entity)
 
 local ENEMY_SIZE = 32
-local MAX_SPEED = 5
+local MAX_SPEED = 4
 local ACQUIRE_DIST = 300
 local ATTACK_RANGE = 200
 local ARRIVE_RADIUS = 50
@@ -22,11 +22,11 @@ local runAnim = 'xenoRun'
 
 function Enemy:initialize(x, y)
   if animations_not_loaded then
-    anim.idle    = Game.xenoIdle
-    anim.running = Game.xenoRun
+    anim.idle    = Game.xenoIdle:clone()
+    anim.running = Game.xenoRun:clone()
 
-    anim.seek = Game.xenoRun
-    anim.fire = Game.xenoIdle
+    anim.seek = Game.xenoRun:clone()
+    anim.fire = Game.xenoIdle:clone()
 
     animations_not_loaded = false
   end
@@ -46,6 +46,9 @@ function Enemy:initialize(x, y)
   self.isDead = false
   self.attackTimer    = 0
   self.attackCooldown = 2
+
+  self.moveTimer = 0
+  self.moveCooldown = 1
 
   self.max_speed = MAX_SPEED
   self.vel = Vec2()
@@ -108,7 +111,7 @@ function Enemy:moveToAttackRange(target)
 
   if dist < ATTACK_RANGE then
     self.canAttack = true
-    self:setState('fire')
+    self:setState('fire', 'idle')
   end
 
   local dest = target.pos - (dir:normalize() * ATTACK_RANGE)
@@ -118,6 +121,9 @@ end
 function Enemy:arrive(target)
 end
 
+function Enemy:canMove()
+  return self.moveTimer <= 0
+end
 
 local collisionFilter = function(enemy, other)
   if other.parent == enemy then return nil
@@ -130,6 +136,10 @@ end
 function Enemy:update(dt)
   self.anim:update(dt)
 
+  if self.moveTimer > 0 then
+    self.moveTimer = self.moveTimer - dt
+  end
+
   if self.health < 1 or self.isDead then
     self:remove()
     return true
@@ -138,6 +148,7 @@ function Enemy:update(dt)
   if self.state == 'idle' and self:canAcquire(Game.player) then
     self.target = Game.player
     self:setState('seek')
+    self.moveTimer = self.moveCooldown
   end
 
   if self.state == 'seek' then
@@ -146,10 +157,16 @@ function Enemy:update(dt)
   end
 
   if self.state == 'fire' then
+    -- Stop moving and shoot
     self.vel = Vec2(0,0)
     self:fireAt(Game.player, dt)
-    if self.pos:dist2(Game.player.pos) > ATTACK_RANGE then
-      self:setState('seek')
+
+    -- If we the player moves away, chase him!
+    if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
+      if self:canMove() then
+        self:setState('seek')
+        self.moveTimer = self.moveCooldown
+      end
     end
   end
 
