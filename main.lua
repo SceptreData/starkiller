@@ -29,7 +29,6 @@ local lg = love.graphics
 local IMG_PATH = 'img/'
 local SND_PATH = 'snd/'
 
-assets = {}
 
 local SCREEN_W = 1024
 local SCREEN_H = 768
@@ -38,6 +37,8 @@ local CELL_SIZE = 32
 
 -- Globals (GASP)
 Game = {}
+Anim = {}
+assets = {}
 
 local blocks = {}
 local player, foe
@@ -51,8 +52,9 @@ local SQUARE = 1024 / MAP_SIZE
 local N_ITER = 4
 
 
-DEBUG_MODE = true
-SOUND_ENABLED = false
+DEBUG_MODE     = true
+SOUND_ENABLED  = false
+DRAW_BSP       = false
 
 local bsp, bspTree
 
@@ -103,9 +105,10 @@ function love.draw()
     map:draw(x, y, w, h)
   end)
 
-  BSP.drawPaths(bsp)
-  --BSP.cheatPath(bsp)
-  BSP.drawTree(bsp)
+  if DRAW_BSP then
+    BSP.drawPaths(bsp)
+    BSP.drawTree(bsp)
+  end
   
   lg.setColor(255, 255, 255, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
@@ -123,6 +126,14 @@ end
 function love.keypressed(key)
   if key == 'escape' then
     love.event.quit()
+  end
+  
+  if key == 'f5' then
+    SOUND_ENABLED = not SOUND_ENABLED
+  elseif key == 'f6' then
+    DRAW_BSP = not DRAW_BSP
+  elseif key == 'f7' then
+    DEBUG_MODE = not DEBUG_MODE
   end
 end
 
@@ -145,13 +156,13 @@ function initWindow()
 end
 
 
-function buildAnim(asset, row, col, dur)
+function buildAnim(asset, frames, dur, spr_w, spr_h)
   local w, h = asset:getDimensions()
-  local g = Anim8.newGrid(32, 32, w, h)
-  local animation = Anim8.newAnimation(g(row, col), dur)
-  return animation
-end
+  local spr_w, spr_h = spr_w or 32, spr_h or 32
+  local g = Anim8.newGrid(spr_w, spr_h, w, h)
 
+  return Anim8.newAnimation(g(unpack(frames)), dur)
+end
 
 function loadMedia()
   assets.icon    = lg.newImage('img/icon.png')
@@ -159,6 +170,11 @@ function loadMedia()
   assets.hero    = lg.newImage('img/tom.png')
   assets.xeno    = lg.newImage('img/xeno.png')
 
-  Game.xenoIdle  = buildAnim(assets.xeno, '1-2', 1, 0.08)
-  Game.heroIdle  = buildAnim(assets.hero, '1-3', 1, 0.1)
+  assets.bullet_a = lg.newImage('img/bullet_a.png')
+
+  Game.bulletFlash  = buildAnim(assets.bullet_a, {'1-5', 1}, 0.05) 
+  Game.bullet    = love.graphics.newQuad(128, 0, 32, 32, assets.bullet_a:getDimensions())
+  Game.xenoIdle  = buildAnim(assets.xeno, {'1-4', 1}, 0.08)
+  Game.xenoRun   = buildAnim(assets.xeno, {5, 1, '1-5', 2}, 0.08)
+  Game.heroIdle  = buildAnim(assets.hero, {'1-3', 1}, 0.1)
 end

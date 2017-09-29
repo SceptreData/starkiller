@@ -1,3 +1,4 @@
+local util = require 'util'
 local Entity = require 'entity'
 
 local rand = math.random
@@ -6,9 +7,7 @@ local floor = math.floor
 local Projectile = Class('Projectile', Entity)
 
 local BULLET_SIZE = 26
-local BULLET_SPEED = 500
-
-local bullet_img = love.graphics.newImage('img/bullet.png')
+local BULLET_SPEED = 600
 
 
 local function adjustForAccuracy(target, acc)
@@ -22,9 +21,15 @@ function Projectile:initialize(parent, origin, target, accuracy)
   Entity.initialize(self, origin.x, origin.y, BULLET_SIZE, BULLET_SIZE)
   self.parent = parent
 
+  self.img  = assets.bullet_a
+  self.quad = Game.bullet
+
   local accuracy = accuracy or 1
   local target = adjustForAccuracy(target, accuracy)
   self.vel = (target - origin):normalize() * BULLET_SPEED
+
+  self.ori = target:angleTo(origin)
+
   self.lifetime = 0
   self.isBullet = true
 end
@@ -57,11 +62,14 @@ end
 
 
 function Projectile:draw()
-  love.graphics.setColor(255, 255, 255, 255)
   local x, y = self.pos.x, self.pos.y
+  if DEBUG_MODE then
+    util.hollowRect({255, 0, 0}, x, y, self.w, self.h)
+  end
+  love.graphics.setColor(255, 255, 255, 255)
   local centre = self:getCentre()
   --love.graphics.draw(bullet_img, centre.x, centre.y, 0, 1, 1, 16, 16)
-  love.graphics.draw(bullet_img, x, y, 0, 1, 1, 16, 16)
+  love.graphics.draw(self.img, self.quad, centre.x, centre.y, self.ori, 1, 1, 16, 16)
 end
 
 return Projectile

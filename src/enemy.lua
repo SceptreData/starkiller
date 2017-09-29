@@ -14,6 +14,8 @@ local ENEMY_ACC = 0.95
 
 local BLUE = {0, 0, 255}
 
+local idleAnim = 'xenoIdle'
+local runAnim = 'xenoRun'
 
 function Enemy:initialize(x, y)
   Entity.initialize(self, x, y, ENEMY_SIZE, ENEMY_SIZE)
@@ -23,7 +25,7 @@ function Enemy:initialize(x, y)
   self.behaviors = {'seek'}
 
   self.img  = assets.xeno
-  self.anim = Game.xenoIdle
+  self.anim =  Game[idleAnim]
 
   self.health = 2
   self.isDead = false
@@ -108,6 +110,8 @@ function Enemy:update(dt)
   if self.state == 'idle' and self:canAcquire(Game.player) then
     self.target = Game.player
     self.state = 'seek'
+    self.anim = Game[runAnim]
+
   end
 
   if self.state == 'seek' then
@@ -120,6 +124,10 @@ function Enemy:update(dt)
     self:fireAt(Game.player, dt)
     if self.pos:dist2(Game.player.pos) > ATTACK_RANGE then
       self.state = 'seek'
+      self.anim = Game[runAnim]
+    else
+      self.state = 'idle'
+      self.anim = Game[idleAnim]
     end
   end
 
