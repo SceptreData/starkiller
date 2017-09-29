@@ -1,5 +1,5 @@
 -- Starkiller
--- The space combat adventure sim
+-- The space combat action game
 -- David Bergeron 2017
 love.filesystem.setRequirePath('?.lua;src/?.lua;')
 
@@ -69,7 +69,7 @@ function love.load()
   -- Init Camera
   camera = CloverCam(0, 0, game_w, game_h, 5)
   Game.camera = camera
-  --camera:setScale(1.5)
+  camera:setScale(1.5)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -79,6 +79,10 @@ function love.load()
   player = Hero:new(SCREEN_W/2, SCREEN_H/2)
   Game.player = player
   foe = Enemy:new(player.pos.x, player.pos.y - 300)
+
+  for i=1, 5 do
+    spawnRandomEnemy()
+  end
 
   bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
   BSP.buildRooms(bsp)
@@ -90,8 +94,9 @@ function love.update(dt)
   map:update(dt)
 
   -- Centre camera on player, update camera
-  local pos = player:getCentre()
-  camera:set(pos.x, pos.y)
+  local mouse_pos = Vec2(love.mouse.getPosition())
+  local cam_pos = mouse_pos:midpoint(player:getCentre())
+  camera:set(cam_pos.x, cam_pos.y)
   camera:update(dt)
 end
 
@@ -100,18 +105,18 @@ function love.draw()
   lg.setColor(255, 255, 255, 255)
   lg.clear(113, 102, 117) -- RUM GREY
 
+  if DRAW_BSP then
+    BSP.drawPaths(bsp)
+    BSP.drawTree(bsp)
+  end
+
   -- Draw our whole map
   camera:draw(function(x, y, w, h)
     map:draw(x, y, w, h)
   end)
 
-  if DRAW_BSP then
-    BSP.drawPaths(bsp)
-    BSP.drawTree(bsp)
-  end
-  
-  lg.setColor(255, 255, 255, 255)
-  lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
+   
+  printFPS()
 end
 
 
@@ -134,6 +139,8 @@ function love.keypressed(key)
     DRAW_BSP = not DRAW_BSP
   elseif key == 'f7' then
     DEBUG_MODE = not DEBUG_MODE
+  elseif key == 'f2' then
+    spawnRandomEnemy()
   end
 end
 
@@ -155,6 +162,10 @@ function initWindow()
   lg.clear()
 end
 
+function printFPS()
+  lg.setColor(255, 255, 255, 255)
+  lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
+end
 
 function buildAnim(asset, frames, dur, spr_w, spr_h)
   local w, h = asset:getDimensions()
@@ -163,6 +174,15 @@ function buildAnim(asset, frames, dur, spr_w, spr_h)
 
   return Anim8.newAnimation(g(unpack(frames)), dur)
 end
+
+
+function spawnRandomEnemy()
+  local x = util.rand(CELL_SIZE, game_w - CELL_SIZE)
+  local y = util.rand(CELL_SIZE, game_h - CELL_SIZE)
+
+  Enemy:new(x, y)
+end
+
 
 function loadMedia()
   assets.icon    = lg.newImage('img/icon.png')
@@ -174,7 +194,10 @@ function loadMedia()
 
   Game.bulletFlash  = buildAnim(assets.bullet_a, {'1-5', 1}, 0.05) 
   Game.bullet    = love.graphics.newQuad(128, 0, 32, 32, assets.bullet_a:getDimensions())
+
   Game.xenoIdle  = buildAnim(assets.xeno, {'1-4', 1}, 0.08)
   Game.xenoRun   = buildAnim(assets.xeno, {5, 1, '1-5', 2}, 0.08)
+
   Game.heroIdle  = buildAnim(assets.hero, {'1-3', 1}, 0.1)
+  Game.heroRun   = buildAnim(assets.hero, {'2-3', 2, '1-3', 3}, 0.1)
 end

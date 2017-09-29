@@ -22,6 +22,11 @@ function CloverCam:set(x, y)
 end
 
 
+function CloverCam:setScale(s)
+  self.cam:setScale(s)
+end
+
+
 function CloverCam:getVisible()
   return self.cam:getVisible()
 end
@@ -30,7 +35,6 @@ end
 function CloverCam:toWorld(x, y)
   return self.cam:toWorld(x, y)
 end
-
 
 
 

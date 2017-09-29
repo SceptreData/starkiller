@@ -18,12 +18,26 @@ local LINE_SIZE         = HERO_SIZE
 
 local pistol_fx = love.sound.newSoundData('snd/pistol.wav')
 
+local animations_are_loaded = false
+
+local anim = {
+}
+
 function Hero:initialize(x, y)
+  if not animations_are_loaded then
+    anim.idle = Game.heroIdle
+    anim.running = Game.heroRun
+    animations_are_loaded = true
+  end
+
   Entity.initialize(self, x, y, HERO_SIZE, HERO_SIZE)
   self.isHero = true
 
   self.img  = assets.hero
-  self.anim = Game.heroIdle
+
+  self.state  = 'idle'
+  self.anim = anim.idle
+  self.flip = false
 
   self.health = 10
   self.isDead = false
@@ -34,11 +48,9 @@ function Hero:initialize(x, y)
   Game.player = self
 end
 
-local heroFilter = function(hero, other)
-  if other.parent == hero then return nil
-  else
-    return 'slide'
-  end
+function Hero:setState(state)
+  self.state = state
+  self.anim = anim[state]
 end
 
 function Hero:fireWeapon(tx, ty)
@@ -87,11 +99,28 @@ function Hero:getVelocityInput(dt)
   self.vel.x, self.vel.y = vx, vy
 end
 
+local heroFilter = function(hero, other)
+  if other.parent == hero then return nil
+  else
+    return 'slide'
+  end
+end
 
 function Hero:update(dt)
   -- Point our gun towards the mouse
   local tx, ty = Game.camera:toWorld(love.mouse.getX(), love.mouse.getY())
   self.ori = (Vec2(tx, ty) - self.pos):normalize()
+  if util.sign(self.ori.x) > 0 then
+    if not self.flip then
+      self.anim:flipH()
+      self.flip = true
+    end
+  else
+    if self.flip == true then
+      self.anim:flipH()
+      self.flip = false
+    end
+  end
 
   self.anim:update(dt)
   
@@ -102,11 +131,13 @@ function Hero:update(dt)
 
   local cols, n_cols
   if not self.vel:isZero() then
+    self:setState('running')
     local dest = self.pos + self.vel
     self.pos.x, self.pos.y, cols, n_cols = Game.world:move(self, dest.x, dest.y, heroFilter)
+  else
+    self:setState('idle')
   end
 end
-
 
 
 function Hero:draw()

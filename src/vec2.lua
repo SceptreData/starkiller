@@ -107,6 +107,11 @@ function Vec2.scale(v, s)
 end
 
 
+function Vec2.midpoint(a, b)
+  return (a + b) * 0.5
+end
+
+
 function Vec2.scaleMe(v, s)
   v.x = v.x * s
   v.y = v.y * s

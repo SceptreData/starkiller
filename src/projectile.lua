@@ -62,13 +62,13 @@ end
 
 
 function Projectile:draw()
-  local x, y = self.pos.x, self.pos.y
+
   if DEBUG_MODE then
-    util.hollowRect({255, 0, 0}, x, y, self.w, self.h)
+    util.hollowRect({255, 0, 0}, self.pos.x, self.pos.y, self.w, self.h)
   end
+
   love.graphics.setColor(255, 255, 255, 255)
   local centre = self:getCentre()
-  --love.graphics.draw(bullet_img, centre.x, centre.y, 0, 1, 1, 16, 16)
   love.graphics.draw(self.img, self.quad, centre.x, centre.y, self.ori, 1, 1, 16, 16)
 end
 

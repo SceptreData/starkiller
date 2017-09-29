@@ -14,22 +14,36 @@ local ENEMY_ACC = 0.95
 
 local BLUE = {0, 0, 255}
 
+local animations_not_loaded = true
+local anim = {}
+
 local idleAnim = 'xenoIdle'
 local runAnim = 'xenoRun'
 
 function Enemy:initialize(x, y)
+  if animations_not_loaded then
+    anim.idle    = Game.xenoIdle
+    anim.running = Game.xenoRun
+
+    anim.seek = Game.xenoRun
+    anim.fire = Game.xenoIdle
+
+    animations_not_loaded = false
+  end
+
   Entity.initialize(self, x, y, ENEMY_SIZE, ENEMY_SIZE)
   self.isEnemy = true
 
-  self.state = 'idle'
+  self.img  = assets.xeno
   self.behaviors = {'seek'}
 
-  self.img  = assets.xeno
-  self.anim =  Game[idleAnim]
+  self.state = 'idle'
+  self:setAnim('idle')
+
+  self.canAttack = false
 
   self.health = 2
   self.isDead = false
-
   self.attackTimer    = 0
   self.attackCooldown = 2
 
@@ -39,11 +53,17 @@ function Enemy:initialize(x, y)
 end
 
 
-local collisionFilter = function(enemy, other)
-  if other.parent == enemy then return nil
-  else
-    return 'slide'
+function Enemy:setState(state, animation)
+  assert(type(state) == 'string')
+  if state ~= self.state then
+    self.state = state
+    self:setAnim(animation or self.state)
   end
+end
+
+
+function Enemy:setAnim(a)
+  self.anim = anim[a]:clone()
 end
 
 
@@ -87,7 +107,8 @@ function Enemy:moveToAttackRange(target)
   local dist = dir:len()
 
   if dist < ATTACK_RANGE then
-    self.state = 'fire'
+    self.canAttack = true
+    self:setState('fire')
   end
 
   local dest = target.pos - (dir:normalize() * ATTACK_RANGE)
@@ -98,8 +119,15 @@ function Enemy:arrive(target)
 end
 
 
-function Enemy:update(dt)
+local collisionFilter = function(enemy, other)
+  if other.parent == enemy then return nil
+  else
+    return 'slide'
+  end
+end
 
+
+function Enemy:update(dt)
   self.anim:update(dt)
 
   if self.health < 1 or self.isDead then
@@ -109,9 +137,7 @@ function Enemy:update(dt)
 
   if self.state == 'idle' and self:canAcquire(Game.player) then
     self.target = Game.player
-    self.state = 'seek'
-    self.anim = Game[runAnim]
-
+    self:setState('seek')
   end
 
   if self.state == 'seek' then
@@ -123,11 +149,7 @@ function Enemy:update(dt)
     self.vel = Vec2(0,0)
     self:fireAt(Game.player, dt)
     if self.pos:dist2(Game.player.pos) > ATTACK_RANGE then
-      self.state = 'seek'
-      self.anim = Game[runAnim]
-    else
-      self.state = 'idle'
-      self.anim = Game[idleAnim]
+      self:setState('seek')
     end
   end
 
@@ -140,12 +162,12 @@ end
 
 
 function Enemy:draw()
-  -- local r, g, b = util.getColor(BLUE)
-  -- love.graphics.setColor(r, g, b, 100)
-  -- love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
-  -- love.graphics.setColor(r, g, b)
-  -- love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+  local x, y = self.pos.x, self.pos.y
 
+  if DEBUG_MODE then
+    util.drawRect(BLUE, x, y, self.w, self.h)
+  end
+  
   love.graphics.setColor(255,255,255,255)
   self.anim:draw(self.img, self.pos.x, self.pos.y)
 end
