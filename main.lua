@@ -29,20 +29,20 @@ local lg = love.graphics
 local IMG_PATH = 'img/'
 local SND_PATH = 'snd/'
 
-
 local SCREEN_W = 1024
 local SCREEN_H = 768
 
 local CELL_SIZE = 32
 
+
 -- Globals (GASP)
-Game = {}
-Anim = {}
+Game   = {}
+Anim   = {}
 assets = {}
 
 local blocks = {}
 local player, foe
-local camera, map
+local map
 
 local game_w, game_h = 1000, 1000
 
@@ -52,7 +52,7 @@ local SQUARE = 1024 / MAP_SIZE
 local N_ITER = 4
 
 
-DEBUG_MODE     = true
+DEBUG_MODE     = false
 SOUND_ENABLED  = false
 DRAW_BSP       = false
 
@@ -67,9 +67,8 @@ function love.load()
   --math.randomseed(os.time())
 
   -- Init Camera
-  camera = CloverCam(0, 0, game_w, game_h, 5)
-  Game.camera = camera
-  camera:setScale(1.5)
+  Game.camera = CloverCam(0, 0, game_w, game_h, 5)
+  Game.camera:setScale(2)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -80,9 +79,7 @@ function love.load()
   Game.player = player
   foe = Enemy:new(player.pos.x, player.pos.y - 300)
 
-  for i=1, 5 do
-    spawnRandomEnemy()
-  end
+  spawnRandomEnemy(5)
 
   bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
   BSP.buildRooms(bsp)
@@ -96,8 +93,8 @@ function love.update(dt)
   -- Centre camera on player, update camera
   local mouse_pos = Vec2(love.mouse.getPosition())
   local cam_pos = mouse_pos:midpoint(player:getCentre())
-  camera:set(cam_pos.x, cam_pos.y)
-  camera:update(dt)
+  Game.camera:set(cam_pos.x, cam_pos.y)
+  Game.camera:update(dt)
 end
 
 
@@ -111,18 +108,17 @@ function love.draw()
   end
 
   -- Draw our whole map
-  camera:draw(function(x, y, w, h)
+  Game.camera:draw(function(x, y, w, h)
     map:draw(x, y, w, h)
   end)
 
-   
   printFPS()
 end
 
 
 function love.mousepressed(x, y, button)
   if button == 1 then
-    local tx, ty = camera:toWorld(x, y)
+    local tx, ty = Game.camera:toWorld(x, y)
     player:fireWeapon(tx, ty)
   end
 end
@@ -162,10 +158,12 @@ function initWindow()
   lg.clear()
 end
 
+
 function printFPS()
   lg.setColor(255, 255, 255, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
 end
+
 
 function buildAnim(asset, frames, dur, spr_w, spr_h)
   local w, h = asset:getDimensions()
@@ -176,15 +174,18 @@ function buildAnim(asset, frames, dur, spr_w, spr_h)
 end
 
 
-function spawnRandomEnemy()
-  local x = util.rand(CELL_SIZE, game_w - CELL_SIZE)
-  local y = util.rand(CELL_SIZE, game_h - CELL_SIZE)
-
-  Enemy:new(x, y)
+function spawnRandomEnemy(num)
+  local num = num or 1
+  for i=1, num do
+    local x = util.rand(CELL_SIZE, game_w - CELL_SIZE)
+    local y = util.rand(CELL_SIZE, game_h - CELL_SIZE)
+    Enemy:new(x, y)
+  end
 end
 
 
 function loadMedia()
+  assets.blaster = lg.newImage('img/blaster.png')
   assets.icon    = lg.newImage('img/icon.png')
   assets.cursor  = lg.newImage('img/cursor.png')
   assets.hero    = lg.newImage('img/tom.png')

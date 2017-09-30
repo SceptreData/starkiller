@@ -6,6 +6,7 @@ local getColor = util.getColor
 
 local Hero = Class('Hero', Entity)
 
+
 local HERO_SIZE         = 32
 local HERO_MAX_SPEED    = 300
 local HERO_ACCEL_SPEED  = 100
@@ -48,10 +49,12 @@ function Hero:initialize(x, y)
   Game.player = self
 end
 
+
 function Hero:setState(state)
   self.state = state
   self.anim = anim[state]
 end
+
 
 function Hero:fireWeapon(tx, ty)
   local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
@@ -69,7 +72,6 @@ function Hero:getVelocityInput(dt)
   if self.isDead then return end
 
   local vx, vy = self.vel.x, self.vel.y
-  
   if love.keyboard.isDown('left', 'a') then
     vx = vx - dt * (vx > 0 and HERO_BRAKE_SPEED or HERO_ACCEL_SPEED)
   elseif love.keyboard.isDown('right', 'd') then
@@ -99,12 +101,14 @@ function Hero:getVelocityInput(dt)
   self.vel.x, self.vel.y = vx, vy
 end
 
+
 local heroFilter = function(hero, other)
   if other.parent == hero then return nil
   else
     return 'slide'
   end
 end
+
 
 function Hero:update(dt)
   -- Point our gun towards the mouse
@@ -140,25 +144,38 @@ function Hero:update(dt)
 end
 
 
+local function drawTargetingLine(x, y, ori)
+  love.graphics.setColor(255, 255, 255, 255)
+
+  local dest = Vec2(x, y) + ori * LINE_SIZE
+  love.graphics.setLineWidth(2)
+  love.graphics.line(x, y, dest.x, dest.y)
+  love.graphics.setLineWidth(1)
+
+  love.graphics.line(x, y, dest.x, dest.y)
+end
+
+
 function Hero:draw()
   -- Draw filled rectangle
+  local centre = self:getCentre()
+
   if DEBUG_MODE then
     local r, g, b = getColor(HERO_COLOR)
     love.graphics.setColor(r, g, b, 100)
     love.graphics.rectangle('fill', self.pos.x, self.pos.y, self.w, self.h)
     love.graphics.setColor(r, g, b)
     love.graphics.rectangle('line', self.pos.x, self.pos.y, self.w, self.h)
+    drawTargetingLine(centre.x, centre.y, self.ori)
   end
 
   love.graphics.setColor(255, 255, 255, 255)
   self.anim:draw(self.img, self.pos.x, self.pos.y)
-
-  -- Draw line towards mouse
-  local centre = self:getCentre()
-  local line_end = centre + self.ori * LINE_SIZE
-  love.graphics.setLineWidth(2)
-  love.graphics.line(centre.x, centre.y, line_end.x, line_end.y)
-  love.graphics.setLineWidth(1)
+  
+  -- Draw gun sprite
+  local r = math.atan2(self.ori.y, self.ori.x)
+  love.graphics.draw(assets.blaster, centre.x, centre.y, r)
 end
+
 
 return Hero
