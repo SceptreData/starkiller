@@ -58,7 +58,8 @@ end
 
 function Hero:fireWeapon(tx, ty)
   local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
-  Projectile:new(self, origin, Vec2(tx, ty), HERO_ACC)
+  local target = Vec2(tx, ty)
+  Projectile:new(self, origin, target, HERO_ACC)
   love.timer.sleep(0.015)
   Game.camera:shake(0.7)
 

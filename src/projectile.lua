@@ -26,9 +26,9 @@ function Projectile:initialize(parent, origin, target, accuracy)
 
   local accuracy = accuracy or 1
   local target = adjustForAccuracy(target, accuracy)
-  self.vel = (target - origin):normalize() * BULLET_SPEED
 
-  self.ori = target:angleTo(origin)
+  self.vel = (target - origin):normalize() * BULLET_SPEED
+  self.ori = origin:angleTo(target)
 
   self.lifetime = 0
   self.isBullet = true

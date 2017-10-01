@@ -184,7 +184,7 @@ end
 
 function Vec2.angleTo(a, b)
     if b then
-        return atan2(a.y, a.x) - atan2(b.y, b.x)
+      return atan2(a.y - b.y, (a.x -b.x))
     end
     return atan2(a.y, a.x)
 end
