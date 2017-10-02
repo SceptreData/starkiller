@@ -9,6 +9,7 @@ local Projectile = Class('Projectile', Entity)
 local BULLET_SIZE = 26
 local BULLET_SPEED = 600
 
+local b_quad = nil
 
 local function adjustForAccuracy(target, acc)
   return Vec2(
@@ -18,11 +19,13 @@ local function adjustForAccuracy(target, acc)
 end
 
 function Projectile:initialize(parent, origin, target, accuracy)
-  Entity.initialize(self, origin.x, origin.y, BULLET_SIZE, BULLET_SIZE)
+    Entity.initialize(self, origin.x, origin.y, BULLET_SIZE, BULLET_SIZE)
   self.parent = parent
 
-  self.img  = assets.bullet_a
-  self.quad = Game.bullet
+  self.img  = Atlas.img.bullet_a
+  if not bullet_quad then
+    b_quad = love.graphics.newQuad(128, 0, 32, 32, self.img:getDimensions())
+  end
 
   local accuracy = accuracy or 1
   local target = adjustForAccuracy(target, accuracy)
@@ -69,7 +72,7 @@ function Projectile:draw()
 
   love.graphics.setColor(255, 255, 255, 255)
   local centre = self:getCentre()
-  love.graphics.draw(self.img, self.quad, centre.x, centre.y, self.ori, 1, 1, 16, 16)
+  love.graphics.draw(self.img, b_quad, centre.x, centre.y, self.ori, 1, 1, 16, 16)
 end
 
 return Projectile

@@ -17,24 +17,24 @@ local HERO_ACC          = 0.95
 
 local LINE_SIZE         = HERO_SIZE
 
-local pistol_fx = love.sound.newSoundData('snd/pistol.wav')
 
 local animations_are_loaded = false
 
 local anim = {
 }
 
-function Hero:initialize(x, y)
+function Hero:initialize(x, y, char)
+  local char = char or 'tom'
   if not animations_are_loaded then
-    anim.idle = Game.heroIdle
-    anim.running = Game.heroRun
+    anim.idle = Atlas:getAnim(char, 'idle')
+    anim.running = Atlas:getAnim(char, 'running')
     animations_are_loaded = true
   end
 
   Entity.initialize(self, x, y, HERO_SIZE, HERO_SIZE)
   self.isHero = true
 
-  self.img  = assets.hero
+  self.img  = Atlas.img[char]
 
   self.state  = 'idle'
   self.anim = anim.idle
@@ -60,12 +60,11 @@ function Hero:fireWeapon(tx, ty)
   local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
   local target = Vec2(tx, ty)
   Projectile:new(self, origin, target, HERO_ACC)
-  love.timer.sleep(0.015)
-  Game.camera:shake(0.7)
 
-  if SOUND_ENABLED then love.audio.newSource(pistol_fx):play() end
-  love.timer.sleep(0.025)
-  Game.camera:shake(0.8)
+  if SOUND_ENABLED then love.audio.newSource(Atlas.snd.pistol2):play() end
+
+  Game.camera:shake(0.7)
+  love.timer.sleep(0.015)
 end
 
 
@@ -175,7 +174,7 @@ function Hero:draw()
   
   -- Draw gun sprite
   local r = math.atan2(self.ori.y, self.ori.x)
-  love.graphics.draw(assets.blaster, centre.x, centre.y, r)
+  love.graphics.draw(Atlas.img.blaster, centre.x, centre.y, r)
 end
 
 

@@ -3,10 +3,15 @@
 --   AKA Rectangles.
 local Entity = Class('Entity')
 
-function Entity:initialize(x, y, w, h)
+local function noCollisions(ent, other) return nil end
+
+function Entity:initialize(x, y, w, h, not_solid)
   self.pos = Vec2(x, y)
   self.w, self.h = w, h
-  --if self.onInit then self:onInit(...) end
+
+  if not_solid then
+    self.collision_filter = noCollisions
+  end
   
   -- Add Entity to the physical world
   Game.world:add(self, x, y, w, h)

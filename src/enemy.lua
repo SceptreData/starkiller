@@ -17,16 +17,14 @@ local BLUE = {0, 0, 255}
 local animations_not_loaded = true
 local anim = {}
 
-local idleAnim = 'xenoIdle'
-local runAnim = 'xenoRun'
-
-function Enemy:initialize(x, y)
+function Enemy:initialize(x, y, id)
+  local id = id or 'xeno'
   if animations_not_loaded then
-    anim.idle    = Game.xenoIdle:clone()
-    anim.running = Game.xenoRun:clone()
+    anim.idle    = Atlas.anim[id].idle:clone()
+    anim.running = Atlas.anim[id].idle:clone()
 
-    anim.seek = Game.xenoRun:clone()
-    anim.fire = Game.xenoIdle:clone()
+    anim.seek = Atlas.anim[id].idle:clone()
+    anim.fire = Atlas.anim[id].idle:clone()
 
     animations_not_loaded = false
   end
@@ -34,7 +32,7 @@ function Enemy:initialize(x, y)
   Entity.initialize(self, x, y, ENEMY_SIZE, ENEMY_SIZE)
   self.isEnemy = true
 
-  self.img  = assets.xeno
+  self.img  = Atlas.img[id]
   self.behaviors = {'seek'}
 
   self.state = 'idle'

@@ -1,13 +1,12 @@
 --
 -- Utility functions
--- Several of these are lifted from lume, a lib by rxi under MIT.
--- I have indicated this where possible.
+-- Contains functions from rxi's lume library, licensed under MIT
 --
 local util = {}
 
-local random = math.random
+local random = love.math.random
 
--- lume
+-- rxi
 local getiter = function(x)
   if util.isarray(x) then
     return ipairs
@@ -17,29 +16,21 @@ local getiter = function(x)
   error("expected table", 3)
 end
 
--- lume
+local patternescape = function(str)
+  return str:gsub("[%(%)%.%%%+%-%*%?%[%]%^%$]", "%%%1")
+end
+
+-- rxi
 -- check if a value is an array
 function util.isarray(x)
   return (type(x) == "table" and x[1] ~= nil) and true or false
 end
 
-
--- lume function
--- Concatenates tables into a single table.
-function util.concat(...)
-  local rtn = {}
-  for i = 1, select("#", ...) do
-    local t = select(i, ...)
-    if t ~= nil then
-      local iter = getiter(t)
-      for _, v in iter(t) do
-        rtn[#rtn + 1] = v
-      end
-    end
-  end
-  return rtn
+function util.array(...)
+  local t = {}
+  for x in ... do t[#t + 1] = x end
+  return t
 end
-
 
 -- lume function
 function util.clamp(x, min, max)
@@ -59,6 +50,40 @@ function util.sign(x)
   return x < 0 and -1 or 1
 end
 
+
+-- lume function
+-- Concatenates tables into a single table.
+function util.concat(...)
+  local rtn = {}
+  for i = 1, select("#", ...) do
+    local t = select(i, ...)
+    if t ~= nil then
+      local iter = getiter(t)
+      for _, v in iter(t) do
+        rtn[#rtn + 1] = v
+      end
+    end
+  end
+  return rtn
+end
+
+-- rxi
+-- splits a string at the specified delimiter, defaults to spaces.
+function util.split(str, sep)
+  if not sep then
+    return util.array(str:gmatch("([%S]+)"))
+  else
+    assert(sep ~= "", "empty separator")
+    local psep = patternescape(sep)
+    return util.array((str..sep):gmatch("(.-)("..psep..")"))
+  end
+end
+
+function util.splitFilename(file)
+  local spl = util.split(file, '.')
+  local front, back = spl[1], spl[2]
+  return front, back
+end
 
 -- lume func
 function util.rand(a, b)

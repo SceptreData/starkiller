@@ -2,6 +2,7 @@ local Block = require 'block'
 local BSP   = require 'bsp'
 local Hero = require 'hero'
 local Enemy = require 'enemy'
+local util = require 'util'
 
 local Map = Class('Map')
 
@@ -48,6 +49,15 @@ function Map:buildBoundaries(w, h, size)
   Block:new(COLOR_RED, 0, size, size, h - size * 2)
   Block:new(COLOR_RED, w - size, size, size, h - size * 2)
   Block:new(COLOR_RED, 0, h- size, w, size)
+end
+
+function Map:spawnRandomEnemy(num)
+  local num = num or 1
+  for i=1, num do
+    local x = util.rand(CELL_SIZE, self.w - CELL_SIZE)
+    local y = util.rand(CELL_SIZE, self.h - CELL_SIZE)
+    Enemy:new(x, y)
+  end
 end
 
 return Map
