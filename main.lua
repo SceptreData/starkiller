@@ -34,21 +34,14 @@ local CELL_SIZE = 32
 -- Globals (GASP)
 Game   = {}
 
-local player, foe
-local map
 
 local game_w = 1024
 local game_h = 1024
 
---BSP STUFF
-local N_ITER = 4
-
-
 DEBUG_MODE     = false
 SOUND_ENABLED  = false
-DRAW_BSP       = false
 
-local bsp, bspTree
+local map
 
 function love.load()
   lg.setDefaultFilter('nearest', 'nearest')
@@ -59,23 +52,19 @@ function love.load()
 
   -- Init Camera
   Game.camera = CloverCam(0, 0, game_w, game_h, 5)
-  --Game.camera:setScale(2)
+  Game.camera:setScale(2)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
   map = Map:new(Game.camera, game_w, game_h)
   map:setup()
   
-  player = Hero:new(game_w/2, game_h/2)
-  Game.player = player
-  Game.camera:set(player.pos.x, player.pos.y)
-  --print(Game.camera.cam:getPosition())
-  --print(player.pos)
-  foe = Enemy:new(player.pos.x, player.pos.y - 300)
+  
+  Game.player = Hero:new(game_w/2, game_h/2)
+  Enemy:new(Game.player.pos.x, Game.player.pos.y - 300)
 
+  Game.camera:set(Game.player.pos.x, Game.player.pos.y)
   map:spawnRandomEnemy(5)
-
-  --bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
 end
 
 
@@ -85,7 +74,7 @@ function love.update(dt)
 
   -- Centre camera on player, update camera
   local mx, my = Game.camera:toWorld(love.mouse.getPosition())
-  local cam_pos = Vec2(mx, my):midpoint(player:getCentre())
+  local cam_pos = Vec2(mx, my):midpoint(Game.player:getCentre())
   Game.camera:set(cam_pos.x, cam_pos.y)
   Game.camera:update(dt)
 end
@@ -94,11 +83,6 @@ end
 function love.draw()
   lg.setColor(255, 255, 255, 255)
   lg.clear(113, 102, 117) -- RUM GREY
-
-  if DRAW_BSP then
-    BSP.drawPaths(bsp)
-    BSP.drawTree(bsp)
-  end
 
   -- Draw our whole map
   Game.camera:draw(function(x, y, w, h)
@@ -112,7 +96,7 @@ end
 function love.mousepressed(x, y, button)
   if button == 1 then
     local tx, ty = Game.camera:toWorld(x, y)
-    player:fireWeapon(tx, ty)
+    Game.player:fireWeapon(tx, ty)
   end
 end
 
@@ -130,8 +114,6 @@ function love.keypressed(key)
     Game.camera:setScale(1)
   elseif key == 'f5' then
     SOUND_ENABLED = not SOUND_ENABLED
-  elseif key == 'f6' then
-    DRAW_BSP = not DRAW_BSP
   elseif key == 'f7' then
     DEBUG_MODE = not DEBUG_MODE
     end

@@ -63,7 +63,7 @@ end
 function TileMap:draw(x, y, w, h)
   local size = self.size
   local mx, my = floor(x / size), floor(y / size)
-  local mw, mh = floor(w / size), floor(h / size)
+  local mw, mh = floor(w / size), util.round(h / size)
   --print(string.format('drawRect - x:%d, y:%d, w:%d, h:%d', mx, my, mw, mh))
   for j=my, my + mh do
     for i=mx, mx + mw do

@@ -4,7 +4,7 @@
 --
 local util = {}
 
-local random = love.math.random
+local random, floor, ceil = love.math.random, math.floor, math.ceil
 
 -- rxi
 local getiter = function(x)
@@ -41,7 +41,7 @@ end
 -- lume function
 function util.round(x, increment)
   if increment then return util.round(x / increment) * increment end
-  return x >= 0 and math_floor(x + .5) or math_ceil(x - .5)
+  return x >= 0 and floor(x + .5) or ceil(x - .5)
 end
 
 
