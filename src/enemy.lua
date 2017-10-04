@@ -21,9 +21,9 @@ function Enemy:initialize(x, y, id)
   local id = id or 'xeno'
   if animations_not_loaded then
     anim.idle    = Atlas.anim[id].idle:clone()
-    anim.running = Atlas.anim[id].idle:clone()
+    anim.running = Atlas.anim[id].running:clone()
 
-    anim.seek = Atlas.anim[id].idle:clone()
+    anim.seek = Atlas.anim[id].running:clone()
     anim.fire = Atlas.anim[id].idle:clone()
 
     animations_not_loaded = false

@@ -85,6 +85,11 @@ function util.splitFilename(file)
   return front, back
 end
 
+function util.getFilename(f)
+  local name = util.splitFilename(f)
+  return name
+end
+
 -- lume func
 function util.rand(a, b)
   if not a then a, b = 0, 1 end
