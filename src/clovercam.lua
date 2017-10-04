@@ -36,7 +36,9 @@ function CloverCam:toWorld(x, y)
   return self.cam:toWorld(x, y)
 end
 
-
+function CloverCam:toScreen(x, y)
+  return self.cam:toScreen(x, y)
+end
 
 function CloverCam:shake(power)
   local power = power or 3

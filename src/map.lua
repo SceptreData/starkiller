@@ -1,7 +1,8 @@
 local Block = require 'block'
 local BSP   = require 'bsp'
-local Hero = require 'hero'
 local Enemy = require 'enemy'
+local Hero = require 'hero'
+local TileMap = require 'tilemap'
 local util = require 'util'
 
 local Map = Class('Map')
@@ -33,6 +34,7 @@ end
 
 function Map:draw(x, y, w, h)
   x, y, w, h = x or 0, y or 0, w or self.w, h or self.w
+  self.tilemap:draw(x, y, w, h)
   local visibleEnts, num = Game.world:queryRect(x, y, w, h)
 
   for i = 1, num do
@@ -42,7 +44,24 @@ end
 
 function Map:setup()
   self:buildBoundaries(self.w, self.h, CELL_SIZE)
+  self:generateBspMap(4)
+  --self.tilemap:printMap()
 end
+
+
+function Map:generateBspMap(num_splits, w_ratio, h_ratio)
+  local w, h = math.floor(self.w / CELL_SIZE), math.floor(self.h / CELL_SIZE)
+  self.tilemap = TileMap.new(1, w, h)
+
+  BSP.setRatio(w_ratio or 0.45, h_ratio or 0.45)
+  local btree = BSP.new(num_splits, 1, 1, w, h)
+  local rooms = BSP.getRooms(btree)
+
+  for i, room in ipairs(rooms) do
+    self.tilemap:fillRect(2, room.x, room.y, room.w, room.h)
+  end
+end
+
 
 function Map:buildBoundaries(w, h, size)
   Block:new(COLOR_RED, 0, 0, w, size)

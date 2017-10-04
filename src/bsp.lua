@@ -68,7 +68,16 @@ function BSP.buildRooms(tree, lvl)
   local lvl = lvl or tree.levels
   local ends = tree:getLevel(lvl)
   for _, v in ipairs(ends) do v.data:newRoom() end
+end
+
+function BSP.getRooms(tree)
+  local ends = tree:getLevel(tree.levels)
+  local rooms = {}
+  for i=1, #ends do
+    table.insert(rooms, ends[i].data.room)
   end
+  return rooms
+end
 
 
 -- Build a tree of BSPes!
@@ -135,7 +144,7 @@ function BSP.bresenPath(x0, y0, x1, y1, w)
 end
 
 
-function BSP:setRatio(w, h)
+function BSP.setRatio(w, h)
   W_RATIO = w or 0.45
   H_RATIO = h or 0.45
 end
@@ -182,8 +191,10 @@ end
 
 
 BSP.new = function(num_splits, x, y, w, h)
-  local bsp = newBox(x, y, w, h)
-  return bsp:split(num_splits)
+  local box = newBox(x, y, w, h)
+  local bsp = box:split(num_splits)
+  BSP.buildRooms(bsp)
+  return bsp
 end
 
 return BSP

@@ -5,6 +5,8 @@ local fs = love.filesystem
 local lg = love.graphics
 local ls = love.sound
 
+local t_insert = table.insert
+
 local Atlas = {}
 Atlas.__index = Atlas
 
@@ -109,7 +111,7 @@ end
 function Atlas:loadTiles()
   local tile_data = loadData('tiles.lua')
   for group_id, tiles in pairs(tile_data) do
-    new_group = {}
+    tgroup = {}
     local img = Atlas.img[tiles.img]
     local grid = getSpriteGrid(img, tiles.sw, tiles.sh)
 
@@ -120,10 +122,10 @@ function Atlas:loadTiles()
         sprite = grid(unpack(tiles[i].frames)),
         walkable = tiles[i].walkable,
       }
-      new_group[tiles[i].id] = new_tile
+      t_insert(tgroup, new_tile)
     end
-
-    Atlas.tile[group_id] = new_group
+    tgroup.kmap = util.mapKeys(tgroup, 'id')
+    Atlas.tile[group_id] = tgroup
   end
 end
 

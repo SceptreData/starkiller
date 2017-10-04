@@ -104,7 +104,17 @@ function util.rectIntersects(a, b)
           b.y <= a.y + a.h)
 end
 
-
+-- returns a table which references the index of table elements in an array.
+-- looksup the value specified by 'field' to use as a key.
+function util.mapKeys(arr, field)
+  assert(util.isarray(arr))
+  local kmap = {}
+  for i=1, #arr do
+    local key = arr[i][field]
+    kmap[key] = i
+  end
+  return kmap
+end
 
 function util.printkv(t)
   assert(type(t) == 'table', 'Expected table, received '.. type(t))
@@ -127,6 +137,10 @@ end
 -- Converts an RGB table to 3 return vals.
 function util.getColor(rgb_t)
   return unpack(rgb_t)
+end
+
+function util.resetColor()
+  love.graphics.setColor(255, 255, 255, 255)
 end
 
 -- Draw functions

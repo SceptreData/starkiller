@@ -28,9 +28,6 @@ local lg = love.graphics
 local IMG_PATH = 'img/'
 local SND_PATH = 'snd/'
 
-local SCREEN_W = 1024
-local SCREEN_H = 768
-
 local CELL_SIZE = 32
 
 
@@ -40,12 +37,10 @@ Game   = {}
 local player, foe
 local map
 
-local game_w = 1000
-local game_h = 1000
+local game_w = 1024
+local game_h = 1024
 
 --BSP STUFF
-local MAP_SIZE = 50
-local SQUARE = 1024 / MAP_SIZE
 local N_ITER = 4
 
 
@@ -68,17 +63,19 @@ function love.load()
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
-  map = Map:new(camera, game_w, game_h)
+  map = Map:new(Game.camera, game_w, game_h)
   map:setup()
   
-  player = Hero:new(SCREEN_W/2, SCREEN_H/2)
+  player = Hero:new(game_w/2, game_h/2)
   Game.player = player
+  Game.camera:set(player.pos.x, player.pos.y)
+  --print(Game.camera.cam:getPosition())
+  --print(player.pos)
   foe = Enemy:new(player.pos.x, player.pos.y - 300)
 
   map:spawnRandomEnemy(5)
 
-  bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
-  BSP.buildRooms(bsp)
+  --bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
 end
 
 
@@ -87,8 +84,8 @@ function love.update(dt)
   map:update(dt)
 
   -- Centre camera on player, update camera
-  local mouse_pos = Vec2(love.mouse.getPosition())
-  local cam_pos = mouse_pos:midpoint(player:getCentre())
+  local mx, my = Game.camera:toWorld(love.mouse.getPosition())
+  local cam_pos = Vec2(mx, my):midpoint(player:getCentre())
   Game.camera:set(cam_pos.x, cam_pos.y)
   Game.camera:update(dt)
 end
@@ -125,15 +122,19 @@ function love.keypressed(key)
     love.event.quit()
   end
   
-  if key == 'f5' then
+  if key == 'f2' then
+    map:spawnRandomEnemy()
+  elseif key == 'f3' then
+    Game.camera:setScale(2)
+  elseif key == 'f4' then
+    Game.camera:setScale(1)
+  elseif key == 'f5' then
     SOUND_ENABLED = not SOUND_ENABLED
   elseif key == 'f6' then
     DRAW_BSP = not DRAW_BSP
   elseif key == 'f7' then
     DEBUG_MODE = not DEBUG_MODE
-  elseif key == 'f2' then
-    map:spawnRandomEnemy()
-  end
+    end
 end
 
 
@@ -150,6 +151,9 @@ function initWindow()
   local cursor_img = Atlas:get('img', 'cursor')
   local cursor     = love.mouse.newCursor(cursor_img:getData(), 15, 15)
   love.mouse.setCursor(cursor)
+
+  love.mouse.setGrabbed(true)
+  love.mouse.setPosition(love.graphics.getWidth() * 0.5, love.graphics.getHeight() * 0.5)
 
   -- Screen defaults
   lg.setBackgroundColor(255, 255, 255)
