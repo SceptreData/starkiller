@@ -1,5 +1,7 @@
+-- Starkiller
+-- entity.lua
 -- Base Class for all Entities
---   In this project all entities are physical bounding boxes
+--   In this project all entities are axis aligned bounding boxes
 --   AKA Rectangles.
 local Entity = Class('Entity')
 
@@ -25,7 +27,7 @@ function Entity:getCentre()
 end
 
 function Entity:remove()
-  --if self.onRemove then self:onRemove() end
+  if self.onRemove then self:onRemove() end
   return Game.world:remove(self)
 end
 

@@ -1,3 +1,6 @@
+-- Starkiller
+-- playerWeapon.lua
+-- This is where we handle drawing and orienting the players different weapons.
 local Entity      = require 'entity'
 local Projectile  = require 'projectile'
 local util        = require 'util'

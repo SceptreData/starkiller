@@ -1,3 +1,7 @@
+-- Starkiller
+-- atlas.lua
+-- Asset management singleton
+-- Where we handle all the loading and parsing of assets and data.
 local Animations = require 'data.animations'
 local util = require 'util'
 
@@ -28,7 +32,7 @@ Atlas.data = {}
 local function isImage(ftype) return ftype == 'png' end
 local function isSound(ftype) return ftype == 'wav' or ftype == 'mp3' end
 
-
+-- Load all the things
 function Atlas:loadAssets()
   Atlas:loadImageFiles()
   Atlas:loadSoundFiles()
@@ -96,7 +100,6 @@ local function buildAnim(img, frames, dur, sw, sh)
 end
 
 function Atlas:loadAnimations()
-  --local animations = require 'animations'
   local animations = loadData('animations.lua')
   animations.DATA_ID = nil
   for ent_id, ent_anims in pairs(animations) do

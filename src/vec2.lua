@@ -1,4 +1,4 @@
---    Sceptre's luajit Vec2 lib
+--    Sceptre's sexy luajit Vec2 lib
 
 local sqrt, cos, sin, atan2 = math.sqrt, math.cos, math.sin, math.atan2
 

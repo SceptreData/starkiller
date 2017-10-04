@@ -1,3 +1,6 @@
+-- Starkiller
+-- block.lua
+-- Simple collision blocks, mostly for testing purposes.
 local Entity = require 'entity'
 local util   = require 'util'
 

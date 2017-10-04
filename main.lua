@@ -6,13 +6,11 @@ love.filesystem.setRequirePath('?.lua;src/?.lua;')
 -- 3rd party libraries
 Anim8    = require 'lib.anim8'
 Class    = require 'lib.middleclass'
-Behavior = require 'lib.behavior'
 Bump     = require 'lib.bump'
-Timer    = require 'lib.timer'
 
 -- Global Starkiller modules
+-- The Atlas is where I store all my assets and data.
 Atlas = require 'atlas'
-BSP = require 'bsp'
 CloverCam = require 'clovercam'
 Vec2  = require 'vec2'
 
@@ -82,9 +80,8 @@ end
 
 function love.draw()
   lg.setColor(255, 255, 255, 255)
-  lg.clear(113, 102, 117) -- RUM GREY
 
-  -- Draw our whole map
+  -- Draw everything inside our map.
   Game.camera:draw(function(x, y, w, h)
     map:draw(x, y, w, h)
   end)

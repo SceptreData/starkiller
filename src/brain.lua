@@ -1,3 +1,6 @@
+-- Starkiller
+-- brain.lua
+-- collection of AI behaviors for our enemies.
 local Brain = Class('Brain')
 
 

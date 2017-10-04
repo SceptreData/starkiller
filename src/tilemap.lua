@@ -1,3 +1,6 @@
+-- Starkiller
+-- tilemap.lua
+-- This is where we handle everything related to the games tiles.
 local util = require 'util'
 
 local floor = math.floor
@@ -49,9 +52,11 @@ function TileMap:fillRect(val, x, y, w, h)
   end
 end
 
+
 function TileMap:getTile(idx)
   return TileData[self.level][idx]
 end
+
 
 function TileMap:drawTile(x, y)
   local tval = self:get(x + 1, y + 1) or 1
@@ -60,17 +65,19 @@ function TileMap:drawTile(x, y)
   love.graphics.draw(tile.img, tile.sprite[1], x * self.size, y * self.size)
 end
 
+
 function TileMap:draw(x, y, w, h)
   local size = self.size
   local mx, my = floor(x / size), floor(y / size)
   local mw, mh = floor(w / size), util.round(h / size)
-  --print(string.format('drawRect - x:%d, y:%d, w:%d, h:%d', mx, my, mw, mh))
+
   for j=my, my + mh do
     for i=mx, mx + mw do
       self:drawTile(i, j)
     end
   end
 end
+
 
 function TileMap:printMap()
   for j = 1, self.h do

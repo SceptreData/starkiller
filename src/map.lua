@@ -1,3 +1,6 @@
+-- Starkiller
+-- map.lua
+-- This is where we generate and manage the levels the player is playing on.
 local Block = require 'block'
 local BSP   = require 'bsp'
 local Enemy = require 'enemy'
@@ -8,11 +11,7 @@ local util = require 'util'
 local Map = Class('Map')
 
 local CELL_SIZE = 32
-
 local COLOR_RED = {255, 0, 0}
-
-
--- TODO: Add sort options etc.
 
 function Map:initialize(camera, w, h)
   self.w, self.h = w, h
@@ -25,7 +24,6 @@ function Map:update(dt, x, y, w, h)
   local visibleEnts, num = Game.world:queryRect(x, y, w, h)
 
   -- Sort intelligently here (SOME DAY!)
-
   for i=1, num do
     visibleEnts[i]:update(dt)
   end
@@ -42,13 +40,15 @@ function Map:draw(x, y, w, h)
   end
 end
 
+
+-- Build a new map for the player to TRY
 function Map:setup()
   self:buildBoundaries(self.w, self.h, CELL_SIZE)
   self:generateBspMap(4)
-  --self.tilemap:printMap()
 end
 
 
+-- Build a tilemap, then split it up into smaller sections using BSP
 function Map:generateBspMap(num_splits, w_ratio, h_ratio)
   local w, h = math.floor(self.w / CELL_SIZE), math.floor(self.h / CELL_SIZE)
   self.tilemap = TileMap.new(1, w, h)
@@ -69,6 +69,7 @@ function Map:buildBoundaries(w, h, size)
   Block:new(COLOR_RED, w - size, size, size, h - size * 2)
   Block:new(COLOR_RED, 0, h- size, w, size)
 end
+
 
 function Map:spawnRandomEnemy(num)
   local num = num or 1

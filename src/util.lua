@@ -1,4 +1,4 @@
---
+-- Starkiller
 -- Utility functions
 -- Contains functions from rxi's lume library, licensed under MIT
 --

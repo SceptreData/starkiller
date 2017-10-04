@@ -1,3 +1,8 @@
+-- Starkiller
+-- enemy.lua
+-- the file where we build new enemies to fight.
+-- Contains all logic related to dudes trying to kill the player.
+
 local Entity      = require 'entity'
 --local Brain       = require 'brain'
 local Projectile  = require 'projectile'
@@ -16,6 +21,7 @@ local BLUE = {0, 0, 255}
 
 local animations_not_loaded = true
 local anim = {}
+
 
 function Enemy:initialize(x, y, id)
   local id = id or 'xeno'
