@@ -59,7 +59,7 @@ function love.load()
 
   -- Init Camera
   Game.camera = CloverCam(0, 0, game_w, game_h, 5)
-  --Game.camera:setScale(2)
+  Game.camera:setScale(2)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
