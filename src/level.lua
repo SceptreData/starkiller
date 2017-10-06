@@ -70,114 +70,6 @@ end
 
 
 
-function Level:buildWalls(room)
-  local x, y, w, h = room.x - 1, room.y - 1, room.w + 2, room.h + 2
-
---  Iterate over tiles to see how big our solid walls should be
---
---  Get top wall of room
- local top = y
- if top < 1 then top = 1 end
- local wx, wy = x, top
- local ww, wh = 0, 1
-
-  for i = x, x+w do
-    -- place wall tile if empty and increase length of this segment
-    local tile = self.tilemap:get(i, top)
-    if tile ~= FLOOR_TILE then
-      self.tilemap:set(WALL_TILE, i, top)
-      ww = ww + 1
-    else
-    -- build up our wall so far
-      if ww > 0 then
-        Wall:new(wx, wy, ww, wh, true)
-        wx = wx + ww
-        ww = 0
-      end
-    end
-  end
-  
-  if ww > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-    Wall:new(wx, wy, ww, wh, true)
-  end
-
-  
-    -- Now do the same for the bottom wall of the square
-     local bot = y + h
-     if bot > self.tilemap.h then
-       bot = bot - 1
-     end
-    
-     wx, wy = x, bot
-     ww, wh = 0, 1
-     for i=x, x+w do
-       if self.tilemap:get(i, bot) == VOID_TILE then
-         self.tilemap:set(WALL_TILE, i, bot)
-         ww = ww + 1
-       else
-         if ww > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-           --print('bot')
-           Wall:new(wx, wy, ww, wh, true)
-           wx = wx + ww
-           ww = 0
-         end
-       end
-     end
-
-     if ww > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-       --print('bot')
-       Wall:new(wx, wy, ww, wh, true)
-     end
-
-   
-    -- Left wall of the square
-    local left = x
-    if left < 1 then left = 1 end
-    wx, wy = left, y + 1
-    ww, wh = 1, 0
-    for j=y + 1, y + h - 1 do
-      if self.tilemap:get(left, j) == VOID_TILE then
-        self.tilemap:set(WALL_TILE, left, j)
-        wh = wh + 1
-      else
-        if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-        --  print('left')
-          Wall:new(wx, wy, ww, wh, true)
-          wy = wy + wh
-          wh = 0
-        end
-      end
-    end
-
-    if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-      Wall:new(wx, wy, ww, wh, true)
-    end
-
-   
-     -- Right wall of the square
-     local right = x + w
-     wx, wy = right, y + 1
-     ww, wh = 1, 0
-     for j=y+1, y+h-1 do
-       if self.tilemap:get(right, j) == VOID_TILE then
-         self.tilemap:set(WALL_TILE, right, j)
-         wh = wh + 1
-       else
-         if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-         --  print('right In')
-           Wall:new(wx, wy, ww, wh, true)
-           wy = wy + wh
-           wh = 0
-         end
-       end
-     end
-
-     if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
-      --print('right out')
-       Wall:new(wx, wy, ww, wh, true)
-    end
-end
-
 function Level:fill(val, x, y, w, h)
   print(x + w, y + h)
   self.tilemap:fillRect(val, x, y, w, h)
@@ -250,7 +142,7 @@ local function new_wall(id, x, y, w, h)
   return  { id=id, x=x, y=y, w=w, h=h}
 end
 
-function Level:buildWalls2(room)
+function Level:buildWalls(room)
   local x, y, w, h = room.x - 1, room.y - 1, room.w + 2, room.h + 2
 
   local changedHeight = false
@@ -353,8 +245,9 @@ function Level:buildWalls2(room)
     j = j + 1
   end
 
-  if right.h > 1 then
+  if right.h > 0 then
     right.id = 'right_late'
+    if changedHeight then right.y = right.y + 1 end
     --right.y = right.y + 1
     table.insert(wall_t, right)
   end
@@ -380,3 +273,112 @@ function Level:wallOff()
 end
 
 return Level
+
+-- function Level:buildWalls(room)
+--   local x, y, w, h = room.x - 1, room.y - 1, room.w + 2, room.h + 2
+--
+-- --  Iterate over tiles to see how big our solid walls should be
+-- --
+-- --  Get top wall of room
+--  local top = y
+--  if top < 1 then top = 1 end
+--  local wx, wy = x, top
+--  local ww, wh = 0, 1
+--
+--   for i = x, x+w do
+--     -- place wall tile if empty and increase length of this segment
+--     local tile = self.tilemap:get(i, top)
+--     if tile ~= FLOOR_TILE then
+--       self.tilemap:set(WALL_TILE, i, top)
+--       ww = ww + 1
+--     else
+--     -- build up our wall so far
+--       if ww > 0 then
+--         Wall:new(wx, wy, ww, wh, true)
+--         wx = wx + ww
+--         ww = 0
+--       end
+--     end
+--   end
+--   
+--   if ww > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--     Wall:new(wx, wy, ww, wh, true)
+--   end
+--
+--   
+--     -- Now do the same for the bottom wall of the square
+--      local bot = y + h
+--      if bot > self.tilemap.h then
+--        bot = bot - 1
+--      end
+--     
+--      wx, wy = x, bot
+--      ww, wh = 0, 1
+--      for i=x, x+w do
+--        if self.tilemap:get(i, bot) == VOID_TILE then
+--          self.tilemap:set(WALL_TILE, i, bot)
+--          ww = ww + 1
+--        else
+--          if ww > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--            --print('bot')
+--            Wall:new(wx, wy, ww, wh, true)
+--            wx = wx + ww
+--            ww = 0
+--          end
+--        end
+--      end
+--
+--      if ww > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--        --print('bot')
+--        Wall:new(wx, wy, ww, wh, true)
+--      end
+--
+--    
+--     -- Left wall of the square
+--     local left = x
+--     if left < 1 then left = 1 end
+--     wx, wy = left, y + 1
+--     ww, wh = 1, 0
+--     for j=y + 1, y + h - 1 do
+--       if self.tilemap:get(left, j) == VOID_TILE then
+--         self.tilemap:set(WALL_TILE, left, j)
+--         wh = wh + 1
+--       else
+--         if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--         --  print('left')
+--           Wall:new(wx, wy, ww, wh, true)
+--           wy = wy + wh
+--           wh = 0
+--         end
+--       end
+--     end
+--
+--     if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--       Wall:new(wx, wy, ww, wh, true)
+--     end
+--
+--    
+--      -- Right wall of the square
+--      local right = x + w
+--      wx, wy = right, y + 1
+--      ww, wh = 1, 0
+--      for j=y+1, y+h-1 do
+--        if self.tilemap:get(right, j) == VOID_TILE then
+--          self.tilemap:set(WALL_TILE, right, j)
+--          wh = wh + 1
+--        else
+--          if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--          --  print('right In')
+--            Wall:new(wx, wy, ww, wh, true)
+--            wy = wy + wh
+--            wh = 0
+--          end
+--        end
+--      end
+--
+--      if wh > 0 and not self.tilemap:has(FLOOR_TILE, wx, wy, ww, wh) then
+--       --print('right out')
+--        Wall:new(wx, wy, ww, wh, true)
+--     end
+-- end
+--
