@@ -7,11 +7,12 @@ local Entity = Class('Entity')
 
 local function noCollisions(ent, other) return nil end
 
-function Entity:initialize(x, y, w, h, not_solid)
+function Entity:initialize(x, y, w, h, notSolid)
   self.pos = Vec2(x, y)
   self.w, self.h = w, h
+  self.notSolid = notSolid or false
 
-  if not_solid then
+  if notSolid then
     self.collision_filter = noCollisions
   end
   

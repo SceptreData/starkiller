@@ -65,5 +65,8 @@ function Tree:each(func, ...)
   if right then right:each(func, ...) end
 end
 
+--function Tree:do(func, ...)
+
+
 
 return setmetatable(Tree, {__call = function(_, ...) return newNode(...) end})

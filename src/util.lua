@@ -104,6 +104,14 @@ function util.rectIntersects(a, b)
           b.y <= a.y + a.h)
 end
 
+function util.inRange(val, low, high)
+  return val >= low and val <= high
+end
+
+function util.inRect(x, y, rx, ry, rw, rh)
+  return (x >= rx and y >= ry and x <= rx + rw and y <= ry + rh)
+end
+
 -- returns a table which references the index of table elements in an array.
 -- looksup the value specified by 'field' to use as a key.
 function util.mapKeys(arr, field)

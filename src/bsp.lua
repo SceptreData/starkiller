@@ -130,36 +130,6 @@ function drawPath(start, dest, width)
   love.graphics.setLineWidth(old_w)
 end
 
-
--- Build a bresenham line path between BSP segments
-function BSP.bresenPath(x0, y0, x1, y1, w)
-  local width = w or 1
-
-  local dx, dy = math.abs(x1 - x0), -math.abs(y1 - y0)
-  local sx = x0 < x1 and width or -width 
-  local sy = y0 < y1 and width or -width
-  local err = dx + dy
-  local e2
-
-  while x0 ~= x1 and y0 ~= y1 do
-    setTile(x0,y0)
-    e2 = 2 * err
-
-    if e2 >= dy then
-      err = err + dy
-      x0 = x0 + sx
-    end
-
-    if e2 <= dx then
-      err = err + dx
-      y0 = y0 + sy
-    end
-  end
-end
-
-
-
-
 local function drawBox(box)
   util.hollowRect({0, 0, 255}, box.x, box.y, box.w, box.h)
   if box.room then

@@ -16,6 +16,7 @@ local ACQUIRE_DIST = 300
 local ATTACK_RANGE = 200
 local ARRIVE_RADIUS = 50
 local ENEMY_ACC = 0.95
+local HIT_DELAY = 0.1
 
 local BLUE = {0, 0, 255}
 
@@ -23,11 +24,14 @@ local animations_not_loaded = true
 local anim = {}
 
 
-function Enemy:initialize(x, y, id)
+function Enemy:initialize(id, x ,y)
   local id = id or 'xeno'
   if animations_not_loaded then
     anim.idle    = Atlas.anim[id].idle:clone()
+    anim.idleImpact = Atlas.anim[id].idleImpact:clone()
+
     anim.running = Atlas.anim[id].running:clone()
+    anim.runningImpact = Atlas.anim[id].runningImpact:clone()
 
     anim.seek = Atlas.anim[id].running:clone()
     anim.fire = Atlas.anim[id].idle:clone()
@@ -46,13 +50,15 @@ function Enemy:initialize(x, y, id)
 
   self.canAttack = false
 
-  self.health = 2
-  self.isDead = false
+  self.health = 3
   self.attackTimer    = 0
   self.attackCooldown = 2
 
   self.moveTimer = 0
   self.moveCooldown = 1
+
+  self.hitAnim = false
+  self.hitTimer = 0
 
   self.max_speed = MAX_SPEED
   self.vel = Vec2()
@@ -64,8 +70,15 @@ function Enemy:setState(state, animation)
   assert(type(state) == 'string')
   if state ~= self.state then
     self.state = state
-    self:setAnim(animation or self.state)
+    if not self.hitAnim then
+      self:setAnim(animation or self.state)
+    end
   end
+end
+
+
+function Enemy:isDead()
+  return self.health < 1
 end
 
 
@@ -74,11 +87,93 @@ function Enemy:setAnim(a)
 end
 
 
-function Enemy:takeDamage(dmg)
-  self.health = self.health - dmg
-  if self.health < 1 then 
-    self.isDead = true
+local collisionFilter = function(enemy, other)
+  if other.parent == enemy then return nil
+  else
+    return 'slide'
   end
+end
+
+
+function Enemy:update(dt)
+  if self.hitTimer > 0 then
+    self.hitTimer = self.hitTimer - dt
+    if self.hitTimer <= 0 then
+      self.hitAnim = false
+      self:setAnim(self.state)
+    end
+  end
+
+  if self.moveTimer > 0 then
+    self.moveTimer = self.moveTimer - dt
+  end
+
+  if self:isDead() then
+    Game.kills = Game.kills + 1
+    self:remove()
+    return true
+  end
+
+  if self.state == 'idle' and self:canAcquire(Game.player) then
+    if not self.hitAnim then
+      self.target = Game.player
+      self:setState('seek')
+      --self.moveTimer = self.moveCooldown
+    end
+  end
+
+  if self.state == 'seek' then
+    --self:seek(Game.player)
+    self:moveToAttackRange(Game.player)
+  end
+
+  if self.state == 'fire' then
+    -- Stop moving and shoot
+    self.vel = Vec2(0,0)
+    self:fireAt(Game.player, dt)
+
+    -- If we the player moves away, chase him!
+    if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
+      if self:canMove() then
+        self:setState('seek')
+        self.moveTimer = self.moveCooldown
+      end
+    end
+  end
+
+  self.anim:update(dt)
+  local cols, n_cols
+  if not self.vel:isZero() then
+    local dest = self.pos + self.vel
+    self.pos.x, self.pos.y, cols, n_cols = Game.world:move(self, dest.x, dest.y, collisionFilter)
+  end
+end
+
+
+function Enemy:draw()
+  local x, y = self.pos.x, self.pos.y
+
+  if DEBUG_MODE then
+    util.drawRect(BLUE, x, y, self.w, self.h)
+  end
+  
+  love.graphics.setColor(255,255,255,255)
+  self.anim:draw(self.img, self.pos.x, self.pos.y)
+end
+
+
+function Enemy:takeDamage(dmg)
+  if self.state == 'idle' or 'fire' then
+    self:setAnim('idleImpact')
+    self.hitAnim = true
+    self.hitTimer = HIT_DELAY
+  elseif self.state == 'running' or 'seek' then
+    self:setAnim('runningImpact')
+    self.hitAnim = true
+    self.hitTimer = HIT_DELAY
+  end
+
+  self.health = self.health - dmg
 end
 
 
@@ -101,6 +196,7 @@ function Enemy:canAcquire(target)
   return self.pos:dist2(target.pos) < ACQUIRE_DIST * ACQUIRE_DIST
 end
 
+
 -- Will implement seek for now, ARRIVE is probably what we want
 -- TODO: Arrive desired distance from player
 function Enemy:seek(pos)
@@ -113,84 +209,26 @@ function Enemy:moveToAttackRange(target)
   local dir = target.pos - self.pos
   local dist = dir:len()
 
-  if dist < ATTACK_RANGE then
-    self.canAttack = true
-    self:setState('fire', 'idle')
+  if dist < ATTACK_RANGE then --and self:canMove() then
+    self:setState('fire')
+    self.moveTimer = self.moveCooldown
+  else
+    local dest = target.pos - (dir:normalize() * ATTACK_RANGE)
+    self:seek(dest)
   end
-
-  local dest = target.pos - (dir:normalize() * ATTACK_RANGE)
-  self:seek(dest)
 end
 
 function Enemy:arrive(target)
 end
 
 function Enemy:canMove()
-  return self.moveTimer <= 0
+  return self.moveTimer <= 0 and not self.hitAnim
 end
 
-local collisionFilter = function(enemy, other)
-  if other.parent == enemy then return nil
-  else
-    return 'slide'
-  end
+function Enemy.getSize(id)
+  -- return Atlas.aliens[id].size
+  return 32
 end
 
-
-function Enemy:update(dt)
-  self.anim:update(dt)
-
-  if self.moveTimer > 0 then
-    self.moveTimer = self.moveTimer - dt
-  end
-
-  if self.health < 1 or self.isDead then
-    self:remove()
-    return true
-  end
-
-  if self.state == 'idle' and self:canAcquire(Game.player) then
-    self.target = Game.player
-    self:setState('seek')
-    self.moveTimer = self.moveCooldown
-  end
-
-  if self.state == 'seek' then
-    --self:seek(Game.player)
-    self:moveToAttackRange(Game.player)
-  end
-
-  if self.state == 'fire' then
-    -- Stop moving and shoot
-    self.vel = Vec2(0,0)
-    self:fireAt(Game.player, dt)
-
-    -- If we the player moves away, chase him!
-    if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
-      if self:canMove() then
-        self:setState('seek')
-        self.moveTimer = self.moveCooldown
-      end
-    end
-  end
-
-  local cols, n_cols
-  if not self.vel:isZero() then
-    local dest = self.pos + self.vel
-    self.pos.x, self.pos.y, cols, n_cols = Game.world:move(self, dest.x, dest.y, collisionFilter)
-  end
-end
-
-
-function Enemy:draw()
-  local x, y = self.pos.x, self.pos.y
-
-  if DEBUG_MODE then
-    util.drawRect(BLUE, x, y, self.w, self.h)
-  end
-  
-  love.graphics.setColor(255,255,255,255)
-  self.anim:draw(self.img, self.pos.x, self.pos.y)
-end
 
 return Enemy

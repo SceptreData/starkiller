@@ -30,8 +30,10 @@ local CELL_SIZE = 32
 
 
 -- Globals (GASP)
-Game   = {}
-
+Game   = {
+  kills = 0,
+  level = 1
+}
 
 local game_w = 1024
 local game_h = 1024
@@ -59,10 +61,10 @@ function love.load()
   
   
   Game.player = Hero:new(game_w/2, game_h/2)
-  Enemy:new(Game.player.pos.x, Game.player.pos.y - 300)
+  Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
   Game.camera:set(Game.player.pos.x, Game.player.pos.y)
-  map:spawnRandomEnemy(5)
+  --map:spawnRandomEnemy(5)
 end
 
 
