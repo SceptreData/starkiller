@@ -288,16 +288,16 @@ function Level:buildWalls2(room)
     table.insert(wall_t, top)
   end
 
-  local bot= new_wall('bot', x, y + h, 0, 1)
+  local bot= new_wall('bot_start', x, y + h, 0, 1)
   i = x
   while i <= x + w do
-    if self:getTile(i, y) ~= FLOOR_TILE then
+    if self:getTile(i, y + h) ~= FLOOR_TILE then
       self.tilemap:set(WALL_TILE, i, y + h)
       bot.w = bot.w + 1
     else
       if bot.w > 0 then
         table.insert(wall_t, bot)
-        bot = new_wall('bot', i, y + h, 0, 1)
+        bot = new_wall('bot_in', i, y + h, 0, 1)
       else
         bot.x = i + 1
       end
@@ -306,6 +306,7 @@ function Level:buildWalls2(room)
   end
 
   if bot.w > 0 then
+    bot.id = 'bot_remain'
     --bot.x = bot.x + 1
     table.insert(wall_t, bot)
   end

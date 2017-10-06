@@ -62,19 +62,19 @@ function LevelGen.bspLevel(id, w, h, num_splits, w_ratio, h_ratio)
   
  connectRooms(btree, level)
 
-  for _, room in ipairs(level.rooms) do
-     --level:buildWalls(room)
-     local walls = level:buildWalls2(room)
-     for _, wall in ipairs(walls) do
-       print(wall.id, wall.x, wall.y, wall.w, wall.h)
-       Wall:new(wall.x, wall.y, wall.w, wall.h, true)
-     end
-  end
-
-
-  -- for _, path in ipairs(level.paths) do
-  --   level:buildWalls(path)
-  -- end
+   for _, room in ipairs(level.rooms) do
+      --level:buildWalls(room)
+      local walls = level:buildWalls2(room)
+      for _, wall in ipairs(walls) do
+        print(wall.id, wall.x, wall.y, wall.w, wall.h)
+        Wall:new(wall.x, wall.y, wall.w, wall.h, true)
+      end
+   end
+  
+  
+    -- for _, path in ipairs(level.paths) do
+    --   level:buildWalls(path)
+    -- end
 
 
   return level

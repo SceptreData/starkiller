@@ -19,7 +19,9 @@ end
 
 
 function Block:draw()
-  drawRect(self.color, self.pos.x, self.pos.y, self.w, self.h)
+  if DEBUG_MODE then
+    drawRect(self.color, self.pos.x, self.pos.y, self.w, self.h)
+  end
 end
 
 return Block

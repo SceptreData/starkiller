@@ -65,7 +65,7 @@ function love.load()
   Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
   Game.camera:set(Game.player.pos.x, Game.player.pos.y)
-  map:spawnRandomEnemy(5)
+  map:spawnRandomEnemy(25)
 end
 
 
