@@ -46,8 +46,8 @@ local font
 
 function love.load()
   lg.setDefaultFilter('nearest', 'nearest')
-  love.math.setRandomSeed(1234567)--os.time())
-  
+--  love.math.setRandomSeed(1234567)--os.time())
+  love.math.setRandomSeed(os.time()) 
   Atlas:loadAssets()
   initWindow()
 

@@ -9,7 +9,7 @@ end
 local CELL_SIZE = 32
 
 function Wall:initialize(x, y, w, h, adjust)
-  print('WALL: ', x, y, w, h)
+  --print('WALL: ', x, y, w, h)
   if adjust then
     x, y, w, h = (x-1) * CELL_SIZE, (y-1) * CELL_SIZE, w * CELL_SIZE, h * CELL_SIZE
   end

@@ -246,20 +246,27 @@ function Level:isBlocked(x, y, w, h)
   return self.tilemap:rectIsBlocked(x, y, w, h) and entIsBlocking(x, y, w, h)
 end
 
-local function new_wall(x, y, w, h)
-  return  {x=x, y=y, w=w, h=h}
+local function new_wall(id, x, y, w, h)
+  return  { id=id, x=x, y=y, w=w, h=h}
 end
 
 function Level:buildWalls2(room)
   local x, y, w, h = room.x - 1, room.y - 1, room.w + 2, room.h + 2
-  if x + w > self.tilemap.w then w = self.tilemap.w - x end
-  if y + h > self.tilemap.h then h = self.tilemap.h - y end
+
+  local changedHeight = false
+  if x + w > self.tilemap.w then w = self.tilemap.w - x 
+  end
+  if y + h > self.tilemap.h then
+    y = y + 1
+    h = self.tilemap.h - y
+    changedHeight = true
+  end
 
   local wall_t = {}
   assert(y > 0 and x > 0 and x + w <= self.tilemap.w and y + h <= self.tilemap.h,
   string.format('%d, %d, %d, %d', x, y, x + w, y + h))
 
-  local top = new_wall(x, y, 0, 1)
+  local top = new_wall('top', x, y, 0, 1)
 
   local i = x
   while i <= x + w do
@@ -271,7 +278,7 @@ function Level:buildWalls2(room)
         top.x = i + 1
       elseif top.w > 0 then
         table.insert(wall_t, top)
-        top = new_wall(i, y, 0, 1)
+        top = new_wall('top', i, y, 0, 1)
       end
     end
     i = i + 1
@@ -281,7 +288,7 @@ function Level:buildWalls2(room)
     table.insert(wall_t, top)
   end
 
-  local bot= new_wall(x, y + h, 0, 1)
+  local bot= new_wall('bot', x, y + h, 0, 1)
   i = x
   while i <= x + w do
     if self:getTile(i, y) ~= FLOOR_TILE then
@@ -290,7 +297,7 @@ function Level:buildWalls2(room)
     else
       if bot.w > 0 then
         table.insert(wall_t, bot)
-        bot = new_wall(i, y + h, 0, 1)
+        bot = new_wall('bot', i, y + h, 0, 1)
       else
         bot.x = i + 1
       end
@@ -299,19 +306,21 @@ function Level:buildWalls2(room)
   end
 
   if bot.w > 0 then
+    --bot.x = bot.x + 1
     table.insert(wall_t, bot)
   end
 
-  local left = new_wall(x, y, 1, 0)
+  local left = new_wall('left', x, y, 1, 0)
   local j = y + 1
-  while j <= y + h - 1 do
+  while j <= y + h do
     if self:getTile(x, j) ~= FLOOR_TILE then
       self.tilemap:set(WALL_TILE, x, j)
       left.h = left.h + 1
     else
       if left.h > 0 then
+        left.y = left.y + 1
         table.insert(wall_t, left)
-        left = new_wall(x, j, 1, 0)
+        left = new_wall('left_early',x, j, 1, 0)
       else
         left.y = j + 1
       end
@@ -320,19 +329,22 @@ function Level:buildWalls2(room)
   end
 
   if left.h > 0 then
+    --left.y = left.y + 1
+    left.id = 'left_late'
     table.insert(wall_t, left)
   end
 
-  local right = new_wall(x + w, y, 1, 0)
+  local right = new_wall('right', x + w, y, 1, 0)
   j = y + 1
-  while j <= y + h - 1 do
+  while j <= y + h  do
     if self:getTile(x + w, j) ~= FLOOR_TILE then
       self.tilemap:set(WALL_TILE, x+w, j)
       right.h = right.h + 1
     else
       if right.h > 0 then
+        right.y = right.y + 1
         table.insert(wall_t, right)
-        right = new_wall(x+w, j, 1, 0)
+        right = new_wall('right_early', x+w, j, 1, 0)
       else
         right.y = j + 1
       end
@@ -340,7 +352,9 @@ function Level:buildWalls2(room)
     j = j + 1
   end
 
-  if right.h > 0 then
+  if right.h > 1 then
+    right.id = 'right_late'
+    --right.y = right.y + 1
     table.insert(wall_t, right)
   end
 

@@ -36,7 +36,7 @@ local function connectRooms(tree, level)
     x1, y1 = floor(right.data.centre.x), floor(right.data.centre.y)
 
     --level:buildPath(x0, y0, x1, y1)
-    table.insert(level.paths, level:pathRect(x0, y0, x1, y1, 2))
+    table.insert(level.paths, level:pathRect(x0, y0, x1, y1, 3))
 
     connectRooms(left,  level)
     connectRooms(right, level)
@@ -66,6 +66,7 @@ function LevelGen.bspLevel(id, w, h, num_splits, w_ratio, h_ratio)
      --level:buildWalls(room)
      local walls = level:buildWalls2(room)
      for _, wall in ipairs(walls) do
+       print(wall.id, wall.x, wall.y, wall.w, wall.h)
        Wall:new(wall.x, wall.y, wall.w, wall.h, true)
      end
   end
