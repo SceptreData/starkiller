@@ -1,3 +1,6 @@
+-- Starkiller
+-- projectile.lua
+-- Base projectile class, handles collisions and distributes death!
 local util = require 'util'
 local Entity = require 'entity'
 
@@ -8,7 +11,6 @@ local Projectile = Class('Projectile', Entity)
 
 local BULLET_SIZE = 26
 local BULLET_SPEED = 600
-
 local b_quad = nil
 
 local function adjustForAccuracy(target, acc)
@@ -37,12 +39,14 @@ function Projectile:initialize(parent, origin, target, accuracy)
   self.isBullet = true
 end
 
+
 function bulletFilter(bullet, other)
   if other == bullet.parent or other.isBullet then return nil
   else
     return 'slide'
   end
 end
+
 
 function Projectile:update(dt)
   self.lifetime = self.lifetime + dt

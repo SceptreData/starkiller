@@ -1,10 +1,10 @@
---
+-- Starkiller
 -- Utility functions
 -- Contains functions from rxi's lume library, licensed under MIT
 --
 local util = {}
 
-local random = love.math.random
+local random, floor, ceil = love.math.random, math.floor, math.ceil
 
 -- rxi
 local getiter = function(x)
@@ -41,7 +41,7 @@ end
 -- lume function
 function util.round(x, increment)
   if increment then return util.round(x / increment) * increment end
-  return x >= 0 and math_floor(x + .5) or math_ceil(x - .5)
+  return x >= 0 and floor(x + .5) or ceil(x - .5)
 end
 
 
@@ -102,6 +102,14 @@ function util.rectIntersects(a, b)
           b.x <= a.x + a.w and
           a.y <= b.y + b.h and
           b.y <= a.y + a.h)
+end
+
+function util.inRange(val, low, high)
+  return val >= low and val <= high
+end
+
+function util.inRect(x, y, rx, ry, rw, rh)
+  return (x >= rx and y >= ry and x <= rx + rw and y <= ry + rh)
 end
 
 -- returns a table which references the index of table elements in an array.

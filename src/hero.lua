@@ -1,3 +1,7 @@
+-- Starkiller
+-- hero.lua
+-- This is where all of my logic related to moving, displaying and
+-- pampering the player takes place.
 local Entity      = require 'entity'
 local Projectile  = require 'projectile'
 local util        = require 'util'
@@ -57,7 +61,7 @@ end
 
 
 function Hero:fireWeapon(tx, ty)
-  local origin = self:getCentre() -- + self.ori-- * LINE_SIZE
+  local origin = self:getCentre()
   local target = Vec2(tx, ty)
   Projectile:new(self, origin, target, HERO_ACC)
 

@@ -1,3 +1,7 @@
+-- Starkiller
+-- atlas.lua
+-- Asset management singleton
+-- Where we handle all the loading and parsing of assets and data.
 local Animations = require 'data.animations'
 local util = require 'util'
 
@@ -28,7 +32,7 @@ Atlas.data = {}
 local function isImage(ftype) return ftype == 'png' end
 local function isSound(ftype) return ftype == 'wav' or ftype == 'mp3' end
 
-
+-- Load all the things
 function Atlas:loadAssets()
   Atlas:loadImageFiles()
   Atlas:loadSoundFiles()
@@ -90,13 +94,19 @@ local function getSpriteGrid(img, sw,  sh)
   return Anim8.newGrid(sw, sh, w, h)
 end
 
-local function buildAnim(img, frames, dur, sw, sh)
+local function buildAnim(img, frames, dur, sw, sh, onLoop)
   local grid = getSpriteGrid(img, sw, sh)
-  return Anim8.newAnimation(grid(unpack(frames)), dur)
+  return Anim8.newAnimation(grid(unpack(frames)), dur, onLoop)
 end
 
+
+function Atlas:newAnimation(ent_id, anim_id, info)
+  local img = Atlas:get('img', info.img)
+  return buildAnim(img, info.frames, info.dur, info.sw, info.sh, info.onLoop)
+end
+
+
 function Atlas:loadAnimations()
-  --local animations = require 'animations'
   local animations = loadData('animations.lua')
   animations.DATA_ID = nil
   for ent_id, ent_anims in pairs(animations) do
@@ -108,6 +118,7 @@ function Atlas:loadAnimations()
   end
 end
 
+ 
 function Atlas:loadTiles()
   local tile_data = loadData('tiles.lua')
   for group_id, tiles in pairs(tile_data) do
@@ -120,19 +131,13 @@ function Atlas:loadTiles()
         img = img,
         id = tiles[i].id,
         sprite = grid(unpack(tiles[i].frames)),
-        walkable = tiles[i].walkable,
+        isWalkable = tiles[i].walkable,
       }
       t_insert(tgroup, new_tile)
     end
     tgroup.kmap = util.mapKeys(tgroup, 'id')
     Atlas.tile[group_id] = tgroup
   end
-end
-
- 
-function Atlas:newAnimation(ent_id, anim_id, info)
-  local img = Atlas:get('img', info.img)
-  return buildAnim(img, info.frames, info.dur, info.sw, info.sh)
 end
 
 function Atlas:getAnim(ent_id, anim)

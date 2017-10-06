@@ -1,15 +1,18 @@
+-- Starkiller
+-- entity.lua
 -- Base Class for all Entities
---   In this project all entities are physical bounding boxes
+--   In this project all entities are axis aligned bounding boxes
 --   AKA Rectangles.
 local Entity = Class('Entity')
 
 local function noCollisions(ent, other) return nil end
 
-function Entity:initialize(x, y, w, h, not_solid)
+function Entity:initialize(x, y, w, h, notSolid)
   self.pos = Vec2(x, y)
   self.w, self.h = w, h
+  self.notSolid = notSolid or false
 
-  if not_solid then
+  if notSolid then
     self.collision_filter = noCollisions
   end
   
@@ -25,7 +28,7 @@ function Entity:getCentre()
 end
 
 function Entity:remove()
-  --if self.onRemove then self:onRemove() end
+  if self.onRemove then self:onRemove() end
   return Game.world:remove(self)
 end
 

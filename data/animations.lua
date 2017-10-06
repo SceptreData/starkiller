@@ -32,10 +32,23 @@ return {
       dur = 0.08
     },
 
+    idleImpact = {
+      img = 'xeno',
+      frames = {'1-2', 2},
+      dur  = 0.025,
+      onLoop = 'pauseAtEnd'
+    },
+
     running = {
       img = 'xeno',
-      frames = {5, 1, '1-5', 2},
-      dur = 0.08
+      frames = {'3-4', 2, '1-4', 3},
+      dur = 0.07
+    },
+    runningImpact = {
+      img = 'xeno',
+      frames = {'1-2', 4},
+      dur = 0.025,
+      onLoop = 'pauseAtEnd'
     }
   }
 }

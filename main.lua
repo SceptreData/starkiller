@@ -6,13 +6,11 @@ love.filesystem.setRequirePath('?.lua;src/?.lua;')
 -- 3rd party libraries
 Anim8    = require 'lib.anim8'
 Class    = require 'lib.middleclass'
-Behavior = require 'lib.behavior'
 Bump     = require 'lib.bump'
-Timer    = require 'lib.timer'
 
 -- Global Starkiller modules
+-- The Atlas is where I store all my assets and data.
 Atlas = require 'atlas'
-BSP = require 'bsp'
 CloverCam = require 'clovercam'
 Vec2  = require 'vec2'
 
@@ -32,28 +30,24 @@ local CELL_SIZE = 32
 
 
 -- Globals (GASP)
-Game   = {}
-
-local player, foe
-local map
+Game   = {
+  kills = 0,
+  level = 1
+}
 
 local game_w = 1024
 local game_h = 1024
 
---BSP STUFF
-local N_ITER = 4
-
-
-DEBUG_MODE     = false
+DEBUG_MODE     = true
 SOUND_ENABLED  = false
-DRAW_BSP       = false
 
-local bsp, bspTree
+local map
+local font
 
 function love.load()
   lg.setDefaultFilter('nearest', 'nearest')
-  --love.math.setRandomSeed(os.time())
-  
+--  love.math.setRandomSeed(1234567)--os.time())
+  love.math.setRandomSeed(os.time()) 
   Atlas:loadAssets()
   initWindow()
 
@@ -66,16 +60,12 @@ function love.load()
   map = Map:new(Game.camera, game_w, game_h)
   map:setup()
   
-  player = Hero:new(game_w/2, game_h/2)
-  Game.player = player
-  Game.camera:set(player.pos.x, player.pos.y)
-  --print(Game.camera.cam:getPosition())
-  --print(player.pos)
-  foe = Enemy:new(player.pos.x, player.pos.y - 300)
+  
+  Game.player = Hero:new(game_w/2, game_h/2)
+  Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
-  map:spawnRandomEnemy(5)
-
-  --bsp = BSP.new(N_ITER, 0, 0, 1024, 768)
+  Game.camera:set(Game.player.pos.x, Game.player.pos.y)
+  map:spawnRandomEnemy(25)
 end
 
 
@@ -85,7 +75,7 @@ function love.update(dt)
 
   -- Centre camera on player, update camera
   local mx, my = Game.camera:toWorld(love.mouse.getPosition())
-  local cam_pos = Vec2(mx, my):midpoint(player:getCentre())
+  local cam_pos = Vec2(mx, my):midpoint(Game.player:getCentre())
   Game.camera:set(cam_pos.x, cam_pos.y)
   Game.camera:update(dt)
 end
@@ -93,18 +83,15 @@ end
 
 function love.draw()
   lg.setColor(255, 255, 255, 255)
-  lg.clear(113, 102, 117) -- RUM GREY
 
-  if DRAW_BSP then
-    BSP.drawPaths(bsp)
-    BSP.drawTree(bsp)
-  end
-
-  -- Draw our whole map
+  -- Draw everything inside our map.
   Game.camera:draw(function(x, y, w, h)
     map:draw(x, y, w, h)
   end)
 
+  if DEBUG_MODE then
+    printDebug()
+  end
   printFPS()
 end
 
@@ -112,7 +99,7 @@ end
 function love.mousepressed(x, y, button)
   if button == 1 then
     local tx, ty = Game.camera:toWorld(x, y)
-    player:fireWeapon(tx, ty)
+    Game.player:fireWeapon(tx, ty)
   end
 end
 
@@ -130,8 +117,6 @@ function love.keypressed(key)
     Game.camera:setScale(1)
   elseif key == 'f5' then
     SOUND_ENABLED = not SOUND_ENABLED
-  elseif key == 'f6' then
-    DRAW_BSP = not DRAW_BSP
   elseif key == 'f7' then
     DEBUG_MODE = not DEBUG_MODE
     end
@@ -158,10 +143,19 @@ function initWindow()
   -- Screen defaults
   lg.setBackgroundColor(255, 255, 255)
   lg.clear()
+  font = lg.newFont(18)
+  lg.setFont(font)
 end
 
 
 function printFPS()
-  lg.setColor(255, 255, 255, 255)
+  lg.setColor(0, 255, 0, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
 end
+
+function printDebug()
+  lg.setColor(0, 255, 0, 255)
+  local tx, ty = Game.camera:toWorld(love.mouse.getPosition())
+  lg.print(string.format('Tile: %d, %d', tx / 32 + 1, ty / 32 + 1), 10, 30)
+end
+

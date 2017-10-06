@@ -1,3 +1,6 @@
+-- Starkiller
+-- tree.lua
+-- Tree data structure, used in a few places
 local util = require 'util'
 local Vec2 = require 'vec2'
 
@@ -53,6 +56,7 @@ function Tree:getLevel(lvl, q)
   return q
 end
 
+
 function Tree:each(func, ...)
   if self == nil then return nil end
   func(self.data, ...)
@@ -60,6 +64,9 @@ function Tree:each(func, ...)
   if left then left:each(func, ...) end
   if right then right:each(func, ...) end
 end
+
+--function Tree:do(func, ...)
+
 
 
 return setmetatable(Tree, {__call = function(_, ...) return newNode(...) end})

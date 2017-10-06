@@ -1,3 +1,7 @@
+-- Starkiller
+-- clovercam.lua
+-- Camera library
+-- My wrapper built over kikito's Gamera in order to add camera shake.
 local Gamera = require 'lib.gamera'
 
 local CloverCam = {}

@@ -1,4 +1,9 @@
---local Entity = require 'entity'
+-- Starkiller
+-- bsp.lua
+-- Binary Space Partition Level Generator
+-- Splits a space into a tree, allowing us to create a series
+-- of rooms.
+
 local Tree = require 'tree'
 local Vec2 = require 'vec2'
 local util = require 'util'
@@ -17,6 +22,7 @@ local DISCARD_BY_RATIO = true
 local W_RATIO = 0.45
 local H_RATIO = 0.45
 
+
 local function newBox(x, y, w, h)
   return setmetatable({
     x = x,
@@ -25,6 +31,12 @@ local function newBox(x, y, w, h)
     h = h,
     centre = Vec2(x + (w/2), y + (h/2))
   }, BSP)
+end
+
+
+function BSP.setRatio(w, h)
+  W_RATIO = w or 0.45
+  H_RATIO = h or 0.45
 end
 
 
@@ -62,24 +74,6 @@ local function randomSplit(box)
   return left, right
 end
 
-
-
-function BSP.buildRooms(tree, lvl)
-  local lvl = lvl or tree.levels
-  local ends = tree:getLevel(lvl)
-  for _, v in ipairs(ends) do v.data:newRoom() end
-end
-
-function BSP.getRooms(tree)
-  local ends = tree:getLevel(tree.levels)
-  local rooms = {}
-  for i=1, #ends do
-    table.insert(rooms, ends[i].data.room)
-  end
-  return rooms
-end
-
-
 -- Build a tree of BSPes!
 function BSP:split(iter, child)
   local root = Tree(self)
@@ -91,6 +85,23 @@ function BSP:split(iter, child)
     root.children[2] = right:split(iter - 1, true)
   end
   return root
+end
+
+
+function BSP.buildRooms(tree, lvl)
+  local lvl = lvl or tree.levels
+  local ends = tree:getLevel(lvl)
+  for _, v in ipairs(ends) do v.data:newRoom() end
+end
+
+
+function BSP.getRooms(tree)
+  local ends = tree:getLevel(tree.levels)
+  local rooms = {}
+  for i=1, #ends do
+    table.insert(rooms, ends[i].data.room)
+  end
+  return rooms
 end
 
 
@@ -107,6 +118,7 @@ function BSP:newRoom()
   self.room = room
 end
 
+
 function drawPath(start, dest, width)
   local old_w = love.graphics.getLineWidth()
   love.graphics.setLineWidth(width or 64)
@@ -118,38 +130,6 @@ function drawPath(start, dest, width)
   love.graphics.setLineWidth(old_w)
 end
 
-function BSP.bresenPath(x0, y0, x1, y1, w)
-  local width = w or 1
-
-  local dx, dy = math.abs(x1 - x0), -math.abs(y1 - y0)
-  local sx = x0 < x1 and width or -width 
-  local sy = y0 < y1 and width or -width
-  local err = dx + dy
-  local e2
-
-  while x0 ~= x1 and y0 ~= y1 do
-    setTile(x0,y0)
-    e2 = 2 * err
-
-    if e2 >= dy then
-      err = err + dy
-      x0 = x0 + sx
-    end
-
-    if e2 <= dx then
-      err = err + dx
-      y0 = y0 + sy
-    end
-  end
-end
-
-
-function BSP.setRatio(w, h)
-  W_RATIO = w or 0.45
-  H_RATIO = h or 0.45
-end
-
-
 local function drawBox(box)
   util.hollowRect({0, 0, 255}, box.x, box.y, box.w, box.h)
   if box.room then
@@ -157,6 +137,7 @@ local function drawBox(box)
     util.drawRect({0, 100, 0}, r.x, r.y, r.w, r.h)
   end
 end
+
 
 function BSP.drawTree(t)
   local box = t.data
@@ -179,15 +160,6 @@ function BSP.drawPaths(t)
     BSP.drawPaths(right)
   end
 end
-
-
-function BSP.cheatPath(tree)
-  local ends = tree:getLeaves()-- tree:getLevel(tree.levels)
-  for i=1, #ends-1 do
-      drawPath(ends[i].data, ends[i+1].data)
-  end
-end
-
 
 
 BSP.new = function(num_splits, x, y, w, h)
