@@ -38,21 +38,22 @@ Game   = {
 local game_w = 1024
 local game_h = 1024
 
-DEBUG_MODE     = false
+DEBUG_MODE     = true
 SOUND_ENABLED  = false
 
 local map
+local font
 
 function love.load()
   lg.setDefaultFilter('nearest', 'nearest')
-  --love.math.setRandomSeed(os.time())
+  love.math.setRandomSeed(1234567)--os.time())
   
   Atlas:loadAssets()
   initWindow()
 
   -- Init Camera
   Game.camera = CloverCam(0, 0, game_w, game_h, 5)
-  Game.camera:setScale(2)
+  --Game.camera:setScale(2)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -64,7 +65,7 @@ function love.load()
   Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
   Game.camera:set(Game.player.pos.x, Game.player.pos.y)
-  --map:spawnRandomEnemy(5)
+  map:spawnRandomEnemy(5)
 end
 
 
@@ -88,6 +89,9 @@ function love.draw()
     map:draw(x, y, w, h)
   end)
 
+  if DEBUG_MODE then
+    printDebug()
+  end
   printFPS()
 end
 
@@ -139,10 +143,19 @@ function initWindow()
   -- Screen defaults
   lg.setBackgroundColor(255, 255, 255)
   lg.clear()
+  font = lg.newFont(18)
+  lg.setFont(font)
 end
 
 
 function printFPS()
-  lg.setColor(255, 255, 255, 255)
+  lg.setColor(0, 255, 0, 255)
   lg.print('FPS: '..tostring(love.timer.getFPS()), 10, 10)
 end
+
+function printDebug()
+  lg.setColor(0, 255, 0, 255)
+  local tx, ty = Game.camera:toWorld(love.mouse.getPosition())
+  lg.print(string.format('Tile: %d, %d', tx / 32 + 1, ty / 32 + 1), 10, 30)
+end
+

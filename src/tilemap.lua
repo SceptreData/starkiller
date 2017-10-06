@@ -173,6 +173,17 @@ function TileMap:rectIsBlocked(x, y, w, h)
 end
 
 
+function TileMap:has(val, x, y, w, h)
+  for j=y, y+h-1 do
+    for i=x, x+w-1 do
+      if self:get(i, j) == val then
+        return true
+      end
+    end
+  end
+  return false
+end
+
 function TileMap:printMap()
   for j = 1, self.h do
     for i = 1, self.w do

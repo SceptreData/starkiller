@@ -1,6 +1,6 @@
 --    Sceptre's sexy luajit Vec2 lib
 
-local sqrt, cos, sin, atan2 = math.sqrt, math.cos, math.sin, math.atan2
+local sqrt, cos, sin, atan2, floor = math.sqrt, math.cos, math.sin, math.atan2, math.floor
 
 local Vec2_mt = {}
 
@@ -193,6 +193,11 @@ end
 function Vec2.project(a, b)
   local den = b:dot(b)
   return b * (a:dot(b)/den)
+end
+
+
+function Vec2.floor(v)
+  return new(floor(v.x), floor(v.y))
 end
 
 

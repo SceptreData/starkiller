@@ -9,7 +9,6 @@ local drawRect = util.drawRect
 local Block = Class('Block', Entity)
 
 function Block:initialize(color, x, y, w, h)
-  print(h)
   Entity.initialize(self, x, y, w, h)
   self.color = color
 end

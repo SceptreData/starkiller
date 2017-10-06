@@ -23,6 +23,7 @@ end
 
 function Map:setup()
   cur_level = LevelGen.bspLevel(1, self.w, self.h)
+  --cur_level = LevelGen.debugSquare(self.w, self.h)
 end
 
 function Map:update(dt, x, y, w, h)
@@ -54,7 +55,7 @@ function Map:spawnRandomEnemy(num)
   for i=1, num do
     local x = util.rand(CELL_SIZE, self.w - CELL_SIZE)
     local y = util.rand(CELL_SIZE, self.h - CELL_SIZE)
-    Enemy:new(x, y)
+    Enemy:new('xeno', x, y)
   end
 end
 
