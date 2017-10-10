@@ -53,7 +53,7 @@ function love.load()
 
   -- Init Camera
   Game.camera = CloverCam(0, 0, game_w, game_h, 5)
-  Game.camera:setScale(2)
+  --Game.camera:setScale(2)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -65,7 +65,7 @@ function love.load()
   --Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
   Game.camera:set(Game.player.pos.x, Game.player.pos.y)
-  --map:spawnRandomEnemy(25)
+  map:spawnRandomEnemy(10)
 end
 
 

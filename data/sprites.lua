@@ -10,5 +10,13 @@ return {
       shell = {2, 1},
       clip = {3, 1}
     }
+  },
+  bullet = {
+    img = 'bullet',
+    sw = 32,
+    sh = 32,
+    sprites = {
+      model = {12, 1}
+    }
   }
 }

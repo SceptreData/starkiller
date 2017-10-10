@@ -62,7 +62,7 @@ function PlayerWeapon:initialize(gun_id, parent)
   self.img = sprites.weapon.img
   self.gun_sprite = sprites.weapon.quad
 
-  self.flash_img = Atlas:getImg('bulletE')
+  self.flash_img = Atlas:getImg('bullet')
   self.flash_anim = Atlas:getAnim('blaster', 'flash')
   
 

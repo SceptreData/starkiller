@@ -5,16 +5,16 @@ return {
 
   bullet = {
     impact = {
-      img = 'bulletE',
-      frames = {8, 1, 7, 1, 8, 1},
-      dur = 0.075,
+      img = 'bullet',
+      frames = {'7-11',1},
+      dur = 0.07,
       onLoop = 'pauseAtEnd'
     }
   },
 
   blaster = {
     flash = {
-      img = 'bulletE',
+      img = 'bullet',
       frames = {'1-6', 1},
       dur = 0.03,
       onLoop = 'pauseAtEnd'

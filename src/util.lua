@@ -97,6 +97,10 @@ function util.rand(a, b)
   return a + random() * (b - a)
 end
 
+function util.roundedRandom(a, b)
+  return util.round(util.rand(a,b))
+end
+
 function util.rectIntersects(a, b)
   return (a.x <= b.x + b.w and
           b.x <= a.x + a.w and

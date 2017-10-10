@@ -9,6 +9,8 @@ local LevelGen = require 'levelgen'
 local TileMap = require 'tilemap'
 local util = require 'util'
 
+local rand = util.roundedRandom
+
 local Map = Class('Map')
 
 local CELL_SIZE = 32
@@ -48,14 +50,16 @@ function Map:draw(x, y, w, h)
 end
 
 
--- Build a new map for the player to TRY
-
 function Map:spawnRandomEnemy(num)
   local num = num or 1
+  local level = cur_level
+
   for i=1, num do
-    local x = util.rand(CELL_SIZE, self.w - CELL_SIZE)
-    local y = util.rand(CELL_SIZE, self.h - CELL_SIZE)
-    Enemy:new('xeno', x, y)
+    local room = level.rooms[rand(1, #level.rooms)]
+    local x = rand(room.x + 1, room.x + room.w - 1)
+    local y = rand(room.y + 1, room.y + room.h - 1)
+
+    Enemy:new('xeno', x * CELL_SIZE, y * CELL_SIZE)
   end
 end
 
