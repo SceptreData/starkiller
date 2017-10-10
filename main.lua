@@ -38,7 +38,7 @@ Game   = {
 local game_w = 1024
 local game_h = 1024
 
-DEBUG_MODE     = true
+DEBUG_MODE     = false
 SOUND_ENABLED  = false
 
 local map
@@ -53,7 +53,7 @@ function love.load()
 
   -- Init Camera
   Game.camera = CloverCam(0, 0, game_w, game_h, 5)
-  --Game.camera:setScale(2)
+  Game.camera:setScale(2)
 
   -- Init Game World
   Game.world = Bump.newWorld(CELL_SIZE)
@@ -93,6 +93,7 @@ function love.draw()
     printDebug()
   end
   printFPS()
+  printConsole()
 end
 
 
@@ -147,6 +148,16 @@ function initWindow()
   lg.setFont(font)
 end
 
+CONSOLE_BUFFER = ''
+function printConsole()
+  lg.setColor(0, 255, 0, 255)
+  love.graphics.print(CONSOLE_BUFFER, 10, 50)
+end
+
+
+function setConsole(str)
+  CONSOLE_BUFFER = str
+end
 
 function printFPS()
   lg.setColor(0, 255, 0, 255)

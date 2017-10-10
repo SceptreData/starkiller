@@ -37,6 +37,8 @@ function Atlas:loadAssets()
   Atlas:loadImageFiles()
   Atlas:loadSoundFiles()
   Atlas:loadAnimations()
+
+  Atlas:loadSprites()
   Atlas:loadTiles()
 end
 
@@ -88,7 +90,7 @@ function Atlas:freeData(id)
   Atlas.data[id] = nil
 end
 
-local function getSpriteGrid(img, sw,  sh)
+local function getSpriteGrid(img, spr_w,  spr_h)
   local w, h = img:getDimensions()
   local sw, sh = spr_w or 32, spr_h or 32
   return Anim8.newGrid(sw, sh, w, h)
@@ -118,6 +120,44 @@ function Atlas:loadAnimations()
   end
 end
 
+local function getSpriteQuad(grid, frame)
+  assert(#frame == 2)
+  return grid(unpack(frame))[1]
+end
+
+function Atlas:addSpriteGroup(name, sprites)
+  assert(type(name) == 'string')
+  Atlas.sprite[name] = sprites
+end
+
+function Atlas:loadSprites()
+  local sprite_data = loadData('sprites.lua')
+
+  for group_name, sprite_sheet in pairs(sprite_data) do
+    local img = Atlas:getImg(sprite_sheet.img)
+    local sprite_w, sprite_h = sprite_sheet.sw, sprite_sheet.sh
+    local grid = getSpriteGrid(img, sprite_w, sprite_h)
+
+    local sprite_t ={}
+    for sprite_id, frame in pairs(sprite_sheet.sprites) do
+      sprite_t[sprite_id] = {
+        img = img,
+        sw = sprite_w,
+        sh = sprite_h,
+        quad = getSpriteQuad(grid, frame)
+      }
+    end
+
+    Atlas:addSpriteGroup(group_name, sprite_t)
+  end
+end
+
+
+function Atlas:addTileGroup(name, tiles)
+  assert(type(name) == 'string')
+  Atlas.tile[name] = tiles
+end
+
  
 function Atlas:loadTiles()
   local tile_data = loadData('tiles.lua')
@@ -136,7 +176,7 @@ function Atlas:loadTiles()
       t_insert(tgroup, new_tile)
     end
     tgroup.kmap = util.mapKeys(tgroup, 'id')
-    Atlas.tile[group_id] = tgroup
+    Atlas:addTileGroup(group_id, tgroup)
   end
 end
 
@@ -150,9 +190,32 @@ function Atlas:newQuad(name, x, y, w, h, sw, sh)
   return self.quads[name]
 end
 
+
 function Atlas:get(group, id)
   assert(type(group) == 'string' and type(id) == 'string')
   return Atlas[group][id]
+end
+
+
+function Atlas:getSound(id)
+  local snd = Atlas.snd[id]
+  assert(snd)
+  return snd
+end
+
+
+function Atlas:getImg(id)
+  return Atlas.img[id]
+end
+
+
+function Atlas:getSprite(group, id)
+  return Atlas.sprite[group][id]
+end
+
+
+function Atlas:getSpriteGroup(name)
+  return Atlas.sprite[name]
 end
 
 return Atlas

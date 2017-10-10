@@ -21,7 +21,8 @@ local function adjustForAccuracy(target, acc)
 end
 
 function Projectile:initialize(parent, origin, target, accuracy)
-    Entity.initialize(self, origin.x, origin.y, BULLET_SIZE, BULLET_SIZE)
+  local pos_mod = BULLET_SIZE * 0.5
+    Entity.initialize(self, origin.x - pos_mod, origin.y - pos_mod, BULLET_SIZE, BULLET_SIZE)
   self.parent = parent
 
   self.img  = Atlas.img.bullet_a

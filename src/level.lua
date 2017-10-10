@@ -71,7 +71,7 @@ end
 
 
 function Level:fill(val, x, y, w, h)
-  print(x + w, y + h)
+  --print(x + w, y + h)
   self.tilemap:fillRect(val, x, y, w, h)
 end
 

@@ -43,6 +43,7 @@ function Enemy:initialize(id, x ,y)
   self.isEnemy = true
 
   self.img  = Atlas.img[id]
+  self.flip = false
   self.behaviors = {'seek'}
 
   self.state = 'idle'
@@ -84,6 +85,7 @@ end
 
 function Enemy:setAnim(a)
   self.anim = anim[a]:clone()
+  if self.flip == true then self.anim:flipH() end 
 end
 
 
@@ -138,6 +140,18 @@ function Enemy:update(dt)
         self:setState('seek')
         self.moveTimer = self.moveCooldown
       end
+    end
+  end
+
+  if self.ori.x > 0 then
+    if not self.flip then
+      self.anim:flipH()
+      self.flip = true
+    end
+  else
+    if self.flip == true then
+      self.anim:flipH()
+      self.flip = false
     end
   end
 
@@ -207,6 +221,7 @@ end
 
 function Enemy:moveToAttackRange(target)
   local dir = target.pos - self.pos
+  self.ori = dir:normalize()
   local dist = dir:len()
 
   if dist < ATTACK_RANGE then --and self:canMove() then
