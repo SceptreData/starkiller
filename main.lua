@@ -62,10 +62,10 @@ function love.load()
   
   
   Game.player = Hero:new(game_w/2, game_h/2)
-  Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
+  --Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
   Game.camera:set(Game.player.pos.x, Game.player.pos.y)
-  map:spawnRandomEnemy(25)
+  --map:spawnRandomEnemy(25)
 end
 
 

@@ -5,8 +5,9 @@ local Entity      = require 'entity'
 local Projectile  = require 'projectile'
 local util        = require 'util'
 
-local atan2 = math.atan2
+local atan2, cos, sin = math.atan2, math.cos, math.sin
 local playSound = love.audio.newSource
+local lg = love.graphics
 
 
 local PlayerWeapon = Class('PlayerWeapon')
@@ -30,7 +31,7 @@ local weapon_list = {
     drops_clip = true,
 
     snd = 'pistol_snd',
-    --flash_img = Game.flash
+    flash_anim = 'flash'
   }
 }
 
@@ -60,6 +61,9 @@ function PlayerWeapon:initialize(gun_id, parent)
   local sprites = Atlas:getSpriteGroup(gun_id)
   self.img = sprites.weapon.img
   self.gun_sprite = sprites.weapon.quad
+
+  self.flash_img = Atlas:getImg('bulletE')
+  self.flash_anim = Atlas:getAnim('blaster', 'flash')
   
 
   if gun.ejects_shells then
@@ -74,40 +78,46 @@ function PlayerWeapon:initialize(gun_id, parent)
 end
 
 
-function  PlayerWeapon:update()
+function  PlayerWeapon:update(dt)
   local default = self.parent:getCentre() + self.offset
 
   local ori = self.parent:getOrientation()
   self.flip = ori.x > 0 and 1 or -1
   self.rot = atan2(ori.y, ori.x)
   self.pos = default:rotateAround(self.parent:getAnchor() , self.rot)
+  if self.isFlashing then
+    self.flash_anim:update(dt)
+    self.flashOff = self.flashOff + self.parent.vel
+    if self.flash_anim.position == 6 then
+      self.isFlashing = false
+    end
+  end
 end
 
 
 function PlayerWeapon:draw()
-  love.graphics.setColor(255, 255, 255, 255)
-  love.graphics.draw(self.img, self.gun_sprite, self.pos.x, self.pos.y, self.rot, 1, self.flip, 4, 8)
-  if DEBUG_MODE then
-    util.drawRect({0,0, 255}, self.pos.x + 10 * math.cos(self.rot), self.pos.y + 10 * math.sin(self.rot),  16, 16)
+  lg.setColor(255, 255, 255, 255)
+  lg.draw(self.img, self.gun_sprite, self.pos.x, self.pos.y, self.rot, 1, self.flip, 4, 8)
+  if self.isFlashing then
+    self.flash_anim:draw(self.flash_img, self.flashOff.x, self.flashOff.y, self.rot, 1, 1, 16, 16)
   end
 end
 
 
 function PlayerWeapon:fireAt(target)
+  local c, s = cos(self.rot), sin(self.rot)
+  offset = Vec2(self.pos.x + 10 * c,
+                self.pos.y + 10 * s
+               )
 
-   gun_offset = Vec2(self.pos.x + 10 * math.cos(self.rot),
-                     self.pos.y + 10 * math.sin(self.rot)
-                    )
-  -- local centre = self.parent:getCentre()
-  -- gun_offset = Vec2(centre.x - 8 * math.cos(self.rot),
-  --                   centre.y - 8 * math.sin(self.rot))
-  --
-  --local gun_offset = self.parent:getCentre()
+  self.flash_anim:gotoFrame(1)
+  self.isFlashing = true
+  local flashAdjust = 25
+  self.flashOff = Vec2(self.pos.x + flashAdjust * c, self.pos.y + flashAdjust * s)
 
-  print(gun_offset)
-  Projectile:new(self.parent, gun_offset, target, self.accuracy)
+  Projectile:new(self.parent, offset, target, self.accuracy)
   if SOUND_ENABLED then
-    playSound(self.sound)
+    playSound(self.sound):play()
   end
 end
 

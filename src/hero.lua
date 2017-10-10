@@ -28,11 +28,15 @@ local animations_are_loaded = false
 local anim = {
 }
 
+local function newAnimTable(anim)
+  return {anim:clone(), anim:clone():flipH()}
+end
+
 function Hero:initialize(x, y, char)
   local char = char or 'tom'
   if not animations_are_loaded then
-    anim.idle = Atlas:getAnim(char, 'idle')
-    anim.running = Atlas:getAnim(char, 'running')
+    anim.idle = newAnimTable(Atlas:getAnim(char, 'idle'))
+    anim.running = newAnimTable(Atlas:getAnim(char, 'running'))
     animations_are_loaded = true
   end
 
@@ -42,7 +46,7 @@ function Hero:initialize(x, y, char)
   self.img  = Atlas.img[char]
 
   self.state  = 'idle'
-  self.anim = anim.idle
+  self.anim = self:setAnim('idle', false)
   self.flip = false
 
   self.health = 10
@@ -61,13 +65,14 @@ end
 function Hero:setState(state)
   if self.state ~= state then
     self.state = state
-    self:setAnim(state)
+    self:setAnim(state, self.flip)
   end
 end
 
 function Hero:setAnim(state)
-  self.anim = anim[state]:clone()
-  if self.flip then self.anim:flipH() end
+  local idx = self.flip and 2 or 1
+  self.anim = anim[state][idx]
+  return self.anim
 end
 
 
@@ -127,19 +132,11 @@ function Hero:update(dt)
   self.target = Vec2(tx, ty)
   
   self.ori = (self.target - self.pos):normalize()
-  if self.ori.x > 0 then
-    if self.flip == false then
-      self.anim:flipH()
-      self.flip = true
-    end
+  if self.ori.x >= 0 then
+    self.flip = true
   else
-    if self.flip == true then
-      self.anim:flipH()
-      self.flip = false
-    end
+    self.flip = false
   end
-
-  self.anim:update(dt)
   
   -- Get input to move our hero
   -- TODO: Rewrite all this crap so friction works properly.
@@ -155,7 +152,10 @@ function Hero:update(dt)
     self:setState('idle')
   end
 
-  self.weapon:update()
+  self:setAnim(self.state)
+  self.anim:update(dt)
+
+  self.weapon:update(dt)
 end
 
 
