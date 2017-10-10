@@ -48,6 +48,7 @@ function Enemy:initialize(id, x ,y)
 
   self.state = 'idle'
   self:setAnim('idle')
+  self.stunLock = false
 
   self.canAttack = false
 
@@ -101,6 +102,8 @@ function Enemy:update(dt)
   if self.hitTimer > 0 then
     self.hitTimer = self.hitTimer - dt
     if self.hitTimer <= 0 then
+      self.stunLock = false
+      self.vel = Vec2(0,0)
       self.hitAnim = false
       self:setAnim(self.state)
     end
@@ -115,30 +118,32 @@ function Enemy:update(dt)
     self:remove()
     return true
   end
-
-  if self.state == 'idle' and self:canAcquire(Game.player) then
-    if not self.hitAnim then
-      self.target = Game.player
-      self:setState('seek')
-      --self.moveTimer = self.moveCooldown
-    end
-  end
-
-  if self.state == 'seek' then
-    --self:seek(Game.player)
-    self:moveToAttackRange(Game.player)
-  end
-
-  if self.state == 'fire' then
-    -- Stop moving and shoot
-    self.vel = Vec2(0,0)
-    self:fireAt(Game.player, dt)
-
-    -- If we the player moves away, chase him!
-    if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
-      if self:canMove() then
+  
+  if not self.stunLock then
+    if self.state == 'idle' and self:canAcquire(Game.player) then
+      if not self.hitAnim then
+        self.target = Game.player
         self:setState('seek')
-        self.moveTimer = self.moveCooldown
+        --self.moveTimer = self.moveCooldown
+      end
+    end
+
+    if self.state == 'seek' then
+      --self:seek(Game.player)
+      self:moveToAttackRange(Game.player)
+    end
+
+    if self.state == 'fire' then
+      -- Stop moving and shoot
+      self.vel = Vec2(0,0)
+      self:fireAt(Game.player, dt)
+
+      -- If we the player moves away, chase him!
+      if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
+        if self:canMove() then
+          self:setState('seek')
+          self.moveTimer = self.moveCooldown
+        end
       end
     end
   end

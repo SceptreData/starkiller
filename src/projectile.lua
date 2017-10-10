@@ -4,13 +4,14 @@
 local util = require 'util'
 local Entity = require 'entity'
 
-local rand = math.random
-local floor = math.floor
+local rand, floor, atan2, abs = util.rand, math.floor, math.atan2, math.abs
 
 local Projectile = Class('Projectile', Entity)
 
 local BULLET_SIZE = 26
 local BULLET_SPEED = 600
+local BULLET_POWER = 3
+
 local b_sprite= nil
 local impact_anim = nil
 
@@ -76,14 +77,15 @@ function Projectile:update(dt)
 
   for i=1, n_cols do
     local col = cols[i]
-    if col.other ~= self.parent then
-      if col.other.isEnemy then
-        col.other:takeDamage(1)
+    local other = col.other
+    if other ~= self.parent then
+      if other.isEnemy then
+        other:takeDamage(1)
+        self:knockback(other)
       elseif col.other.isWall then
         self.impact_anim = impact_anim:clone()
-        self.impact_anim:gotoFrame(1)
         self.isAnimating = true
-        self.ori = self.ori * Vec2(math.abs(col.normal.x), math.abs(col.normal.y))
+        self.ori = self.ori * Vec2(abs(col.normal.x), abs(col.normal.y))
       end
       self.isDead = true
       self.vel = Vec2(0,0)
@@ -100,16 +102,21 @@ function Projectile:draw()
   end
 
   local centre = self:getCentre()
+  local r = atan2(self.ori.y, self.ori.x)
 
   love.graphics.setColor(255, 255, 255, 255)
   if not self.isAnimating  and not self.isDead then
-    love.graphics.draw(self.img, b_sprite.quad, centre.x, centre.y, self.rot, 1, 1, 16, 16)
+    love.graphics.draw(self.img, b_sprite.quad, centre.x, centre.y, r, 1, 1, 16, 16)
   else
     if self.isAnimating then
-      local r = math.atan2(self.ori.y, self.ori.x)
       self.impact_anim:draw(self.img, centre.x, centre.y, r, 1, 1, 16, 16)
     end
   end
+end
+
+function Projectile:knockback(other)
+  other.stunLock = true
+  other.vel = self.ori * BULLET_POWER
 end
 
 return Projectile

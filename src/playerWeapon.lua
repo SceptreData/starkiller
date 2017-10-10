@@ -57,6 +57,7 @@ function PlayerWeapon:initialize(gun_id, parent)
   self.acc = gun.accuracy
   self.clip_size = gun.clip_size
   self.reload_time = gun.reload_time
+  self.accuracy = gun.accuracy
 
   local sprites = Atlas:getSpriteGroup(gun_id)
   self.img = sprites.weapon.img

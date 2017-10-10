@@ -24,7 +24,7 @@ function Map:initialize(camera, w, h)
 end
 
 function Map:setup()
-  cur_level = LevelGen.bspLevel(1, self.w, self.h)
+  cur_level = LevelGen.bspLevel(1, self.w, self.h, 3, 0.5, 0.3)
   --cur_level = LevelGen.debugSquare(self.w, self.h)
 end
 
@@ -57,7 +57,7 @@ function Map:spawnRandomEnemy(num)
   for i=1, num do
     local room = level.rooms[rand(1, #level.rooms)]
     local x = rand(room.x + 1, room.x + room.w - 1)
-    local y = rand(room.y + 1, room.y + room.h - 1)
+    local y = rand(room.y + 1, room.y + room.h - 2)
 
     Enemy:new('xeno', x * CELL_SIZE, y * CELL_SIZE)
   end
