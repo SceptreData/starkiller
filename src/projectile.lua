@@ -82,6 +82,7 @@ function Projectile:update(dt)
       if other.isEnemy then
         other:takeDamage(1)
         self:knockback(other)
+        love.timer.sleep(0.02)
       elseif col.other.isWall then
         self.impact_anim = impact_anim:clone()
         self.isAnimating = true

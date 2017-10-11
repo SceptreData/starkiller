@@ -78,9 +78,6 @@ end
 
 function Hero:fireWeapon(tx, ty)
   self.weapon:fireAt(Vec2(tx, ty))
-
-  Game.camera:shake(0.7)
-  love.timer.sleep(0.015)
 end
 
 

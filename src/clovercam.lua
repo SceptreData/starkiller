@@ -3,6 +3,9 @@
 -- Camera library
 -- My wrapper built over kikito's Gamera in order to add camera shake.
 local Gamera = require 'lib.gamera'
+local util = require 'util'
+
+local rand = util.rand
 
 local CloverCam = {}
 
@@ -25,6 +28,10 @@ function CloverCam:set(x, y)
   self.cam:setPosition(x, y)
 end
 
+function CloverCam:offset(x, y)
+  local camx, camy = self.cam:getPosition()
+  self:set(camx - x, camy - y)
+end
 
 function CloverCam:setScale(s)
   self.cam:setScale(s)
@@ -53,8 +60,8 @@ function CloverCam:update(dt)
   self.shakeWeight = math.max(0, self.shakeWeight - self.fade * dt)
   if self.shakeWeight > 0 then
     local x, y = self.cam:getPosition()
-    x = x + (100 - 200 * math.random(self.shakeWeight)) * dt
-    y = y + (100 - 200 * math.random(self.shakeWeight)) * dt
+    x = x + (100 - 200 * rand(self.shakeWeight)) * dt
+    y = y + (100 - 200 * rand(self.shakeWeight)) * dt
     self:set(x, y)
   end
 end

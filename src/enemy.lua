@@ -186,6 +186,7 @@ function Enemy:takeDamage(dmg)
     self:setAnim('idleImpact')
     self.hitAnim = true
     self.hitTimer = HIT_DELAY
+    if self.state == 'idle' then self:setState('seek') end
   elseif self.state == 'running' or 'seek' then
     self:setAnim('runningImpact')
     self.hitAnim = true

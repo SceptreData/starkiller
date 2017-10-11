@@ -38,6 +38,9 @@ Game   = {
 local game_w = 1024
 local game_h = 1024
 
+local MAX_CAM_SHAKE = 5
+local SHAKE_FADE = 6
+
 DEBUG_MODE     = false
 SOUND_ENABLED  = false
 
@@ -52,7 +55,7 @@ function love.load()
   initWindow()
 
   -- Init Camera
-  Game.camera = CloverCam(0, 0, game_w, game_h, 5)
+  Game.camera = CloverCam(0, 0, game_w, game_h, MAX_CAM_SHAKE, SHAKE_FADE)
   --Game.camera:setScale(2)
 
   -- Init Game World
@@ -70,15 +73,15 @@ end
 
 
 function love.update(dt)
-  -- Update all objects on our map
-  map:update(dt)
-
   -- Centre camera on player, update camera
   local mx, my = Game.camera:toWorld(love.mouse.getPosition())
   local cam_pos = Vec2(mx, my):midpoint(Game.player:getCentre())
   Game.camera:set(cam_pos.x, cam_pos.y)
   Game.camera:update(dt)
-end
+
+  -- Update all objects on our map
+  map:update(dt)
+ end
 
 
 function love.draw()
