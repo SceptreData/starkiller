@@ -117,8 +117,7 @@ function PlayerWeapon:fireAt(target)
   Game.camera:shake(1)
   love.timer.sleep(0.025)
 
-  self:setKick(c, s, 5)
-
+  self:setKick(c, s, 4)
 
   local flashAdjust = 25
   self.flashOff = Vec2(self.pos.x + flashAdjust * c, self.pos.y + flashAdjust * s)

@@ -26,23 +26,31 @@ local lg = love.graphics
 local IMG_PATH = 'img/'
 local SND_PATH = 'snd/'
 
+-- System Information
+local OPERATING_SYSTEM = nil
+
+-- Program State Globals
+DEBUG_MODE     = false
+SOUND_ENABLED  = false
+
+-- Options for gif recording
+local AUTO_BUILD_GIF = true
+local RECORD_FPS = 30
+
+
+-- Game Defaults
+local game_w = 1024
+local game_h = 1024
+
 local CELL_SIZE = 32
+local MAX_CAM_SHAKE = 5
+local SHAKE_FADE = 6
 
-
--- Globals (GASP)
+-- Global Game Table
 Game   = {
   kills = 0,
   level = 1
 }
-
-local game_w = 1024
-local game_h = 1024
-
-local MAX_CAM_SHAKE = 5
-local SHAKE_FADE = 6
-
-DEBUG_MODE     = false
-SOUND_ENABLED  = false
 
 local map
 local font
@@ -95,6 +103,7 @@ function love.draw()
   if DEBUG_MODE then
     printDebug()
   end
+
   printFPS()
   printConsole()
 end
@@ -102,8 +111,7 @@ end
 
 function love.mousepressed(x, y, button)
   if button == 1 then
-    local tx, ty = Game.camera:toWorld(x, y)
-    Game.player:fireWeapon(tx, ty)
+    Game.player:fireWeapon(Game.camera:toWorld(x, y))
   end
 end
 
@@ -123,14 +131,33 @@ function love.keypressed(key)
     SOUND_ENABLED = not SOUND_ENABLED
   elseif key == 'f7' then
     DEBUG_MODE = not DEBUG_MODE
+  elseif key == 'f11' then
+    RECORDING = not RECORDING
+    Game.camera:toggleRecord(RECORD_FPS)
+  elseif key == 'f12' then
+    lg.newScreenshot():encode('png', 'screenshots/' .. os.time() .. '.png')
     end
 end
 
+function love.quit()
+  -- Process all of our recorded screenshot frames.
+  if Game.camera.frames_recorded > 0 then
+    Game.camera:processFrames()
+
+    if OPERATING_SYSTEM == 'Windows' and AUTO_BUILD_GIF == true then
+      os.execute(fs.getSaveDirectory() .. '/makeGif.bat')
+    end
+  end
+end
 
 function initWindow()
   -- Load window Defaults
   love.window.setTitle('Starkiller')
   fs.setIdentity('Starkiller')
+
+  OPERATING_SYSTEM = love.system.getOS()
+  fs.createDirectory('screenshots')
+  fs.createDirectory('frames')
 
   -- Set Icon
   local icon_img = Atlas.img.icon
@@ -172,4 +199,3 @@ function printDebug()
   local tx, ty = Game.camera:toWorld(love.mouse.getPosition())
   lg.print(string.format('Tile: %d, %d', tx / 32 + 1, ty / 32 + 1), 10, 30)
 end
-
