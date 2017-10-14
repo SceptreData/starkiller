@@ -38,7 +38,7 @@ Game   = {
 local game_w = 1024
 local game_h = 1024
 
-DEBUG_MODE     = true
+DEBUG_MODE     = false
 SOUND_ENABLED  = false
 
 local map
@@ -65,7 +65,7 @@ function love.load()
   Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)
 
   Game.camera:set(Game.player.pos.x, Game.player.pos.y)
-  map:spawnRandomEnemy(25)
+  map:spawnRandomEnemy(50)
 end
 
 
