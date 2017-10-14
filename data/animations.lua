@@ -3,11 +3,21 @@
 return {
   DATA_ID = 'animations',
 
-  pistol = {
+  bullet = {
+    impact = {
+      img = 'bullet',
+      frames = {'7-11',1},
+      dur = 0.07,
+      onLoop = 'pauseAtEnd'
+    }
+  },
+
+  blaster = {
     flash = {
-      img = 'bullet_a',
-      frames = {'1-5', 1},
-      dur = 0.05
+      img = 'bullet',
+      frames = {'1-6', 1},
+      dur = 0.03,
+      onLoop = 'pauseAtEnd'
     }
   },
 

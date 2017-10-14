@@ -45,13 +45,12 @@ end
 
 function LevelGen.bspLevel(id, w, h, num_splits, w_ratio, h_ratio)
   local level = Level.new(id, w, h)
-
   local num_splits = num_splits or DEFAULT_SPLITS
   BSP.setRatio(w_ratio or 0.45, h_ratio or 0.45)
 
   local btree = BSP.new(num_splits, 1, 1, level.tilemap.w, level.tilemap.h)
   level.rooms = BSP.getRooms(btree)
-  print(#level.rooms)
+  --print(#level.rooms)
 
   for _, room in ipairs(level.rooms) do
     level:hollowOut(room)
@@ -60,6 +59,7 @@ function LevelGen.bspLevel(id, w, h, num_splits, w_ratio, h_ratio)
   level:wallOff()
  --cheatRooms(level) 
   
+<<<<<<< HEAD
   connectRooms(btree, level)
 
   for _, room in ipairs(level.rooms) do
@@ -76,6 +76,22 @@ function LevelGen.bspLevel(id, w, h, num_splits, w_ratio, h_ratio)
      local walls = level:buildWalls(path)
    end
 
+=======
+ connectRooms(btree, level)
+
+ for _, room in ipairs(level.rooms) do
+    --level:buildWalls(room)
+    local walls = level:buildWalls(room)
+    for _, wall in ipairs(walls) do
+      --print(wall.id, wall.x, wall.y, wall.w, wall.h)
+      Wall:new(wall.x, wall.y, wall.w, wall.h, true)
+    end
+ end
+
+ for _, path in ipairs(level.paths) do
+   local walls = level:buildWalls(path)
+ end
+>>>>>>> 0837d89ad2dff8b098fb337e91fdef62bfa9abe6
 
   return level
 end

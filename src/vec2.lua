@@ -172,10 +172,15 @@ function Vec2:rotateMe(rad)
 end
 
 
-function Vec2.rotateAround(a, b, rad)
-  return (b - a):rotate(rad) + a
+function Vec2.rotateAround(v, pivot, rad)
+  return (v - pivot):rotate(rad) + pivot
 end
 
+function Vec2.rot2(p, o, r)
+  local dir = p - o
+  dir = dir:rotate(r)
+  return dir + o
+end
 
 function Vec2.perpendicular(v)
     return new(-v.y, v.x)

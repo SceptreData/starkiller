@@ -3,6 +3,7 @@
 -- This is where all of my logic related to moving, displaying and
 -- pampering the player takes place.
 local Entity      = require 'entity'
+local PlayerWeapon = require 'playerWeapon'
 local Projectile  = require 'projectile'
 local util        = require 'util'
 
@@ -27,11 +28,15 @@ local animations_are_loaded = false
 local anim = {
 }
 
+local function newAnimTable(anim)
+  return {anim:clone(), anim:clone():flipH()}
+end
+
 function Hero:initialize(x, y, char)
   local char = char or 'tom'
   if not animations_are_loaded then
-    anim.idle = Atlas:getAnim(char, 'idle')
-    anim.running = Atlas:getAnim(char, 'running')
+    anim.idle = newAnimTable(Atlas:getAnim(char, 'idle'))
+    anim.running = newAnimTable(Atlas:getAnim(char, 'running'))
     animations_are_loaded = true
   end
 
@@ -41,7 +46,7 @@ function Hero:initialize(x, y, char)
   self.img  = Atlas.img[char]
 
   self.state  = 'idle'
-  self.anim = anim.idle
+  self.anim = self:setAnim('idle', false)
   self.flip = false
 
   self.health = 10
@@ -49,26 +54,30 @@ function Hero:initialize(x, y, char)
 
   self.vel    = Vec2(0,0)
   self.ori    = Vec2()
+  self.anchor = Vec2(0, 4)
+
+  self.weapon = PlayerWeapon:new('blaster', self)
 
   Game.player = self
 end
 
 
 function Hero:setState(state)
-  self.state = state
-  self.anim = anim[state]
+  if self.state ~= state then
+    self.state = state
+    self:setAnim(state, self.flip)
+  end
+end
+
+function Hero:setAnim(state)
+  local idx = self.flip and 2 or 1
+  self.anim = anim[state][idx]
+  return self.anim
 end
 
 
 function Hero:fireWeapon(tx, ty)
-  local origin = self:getCentre()
-  local target = Vec2(tx, ty)
-  Projectile:new(self, origin, target, HERO_ACC)
-
-  if SOUND_ENABLED then love.audio.newSource(Atlas.snd.pistol2):play() end
-
-  Game.camera:shake(0.7)
-  love.timer.sleep(0.015)
+  self.weapon:fireAt(Vec2(tx, ty))
 end
 
 
@@ -117,20 +126,14 @@ end
 function Hero:update(dt)
   -- Point our gun towards the mouse
   local tx, ty = Game.camera:toWorld(love.mouse.getX(), love.mouse.getY())
-  self.ori = (Vec2(tx, ty) - self.pos):normalize()
-  if util.sign(self.ori.x) > 0 then
-    if not self.flip then
-      self.anim:flipH()
-      self.flip = true
-    end
+  self.target = Vec2(tx, ty)
+  
+  self.ori = (self.target - self.pos):normalize()
+  if self.ori.x >= 0 then
+    self.flip = true
   else
-    if self.flip == true then
-      self.anim:flipH()
-      self.flip = false
-    end
+    self.flip = false
   end
-
-  self.anim:update(dt)
   
   -- Get input to move our hero
   -- TODO: Rewrite all this crap so friction works properly.
@@ -145,6 +148,11 @@ function Hero:update(dt)
   else
     self:setState('idle')
   end
+
+  self:setAnim(self.state)
+  self.anim:update(dt)
+
+  self.weapon:update(dt)
 end
 
 
@@ -157,6 +165,16 @@ local function drawTargetingLine(x, y, ori)
   love.graphics.setLineWidth(1)
 
   love.graphics.line(x, y, dest.x, dest.y)
+end
+
+
+function Hero:getOrientation()
+  return (self.target - self:getCentre()):normalize()
+end
+
+
+function Hero:getAnchor()
+  return self:getCentre() + self.anchor
 end
 
 
@@ -177,8 +195,7 @@ function Hero:draw()
   self.anim:draw(self.img, self.pos.x, self.pos.y)
   
   -- Draw gun sprite
-  local r = math.atan2(self.ori.y, self.ori.x)
-  love.graphics.draw(Atlas.img.blaster, centre.x, centre.y, r)
+  self.weapon:draw()
 end
 
 

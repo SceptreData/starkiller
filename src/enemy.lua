@@ -43,10 +43,12 @@ function Enemy:initialize(id, x ,y)
   self.isEnemy = true
 
   self.img  = Atlas.img[id]
+  self.flip = false
   self.behaviors = {'seek'}
 
   self.state = 'idle'
   self:setAnim('idle')
+  self.stunLock = false
 
   self.canAttack = false
 
@@ -84,6 +86,7 @@ end
 
 function Enemy:setAnim(a)
   self.anim = anim[a]:clone()
+  if self.flip == true then self.anim:flipH() end 
 end
 
 
@@ -99,6 +102,8 @@ function Enemy:update(dt)
   if self.hitTimer > 0 then
     self.hitTimer = self.hitTimer - dt
     if self.hitTimer <= 0 then
+      self.stunLock = false
+      self.vel = Vec2(0,0)
       self.hitAnim = false
       self:setAnim(self.state)
     end
@@ -113,31 +118,45 @@ function Enemy:update(dt)
     self:remove()
     return true
   end
+  
+  if not self.stunLock then
+    if self.state == 'idle' and self:canAcquire(Game.player) then
+      if not self.hitAnim then
+        self.target = Game.player
+        self:setState('seek')
+        --self.moveTimer = self.moveCooldown
+      end
+    end
 
-  if self.state == 'idle' and self:canAcquire(Game.player) then
-    if not self.hitAnim then
-      self.target = Game.player
-      self:setState('seek')
-      --self.moveTimer = self.moveCooldown
+    if self.state == 'seek' then
+      --self:seek(Game.player)
+      self:moveToAttackRange(Game.player)
+    end
+
+    if self.state == 'fire' then
+      -- Stop moving and shoot
+      self.vel = Vec2(0,0)
+      self:fireAt(Game.player, dt)
+
+      -- If we the player moves away, chase him!
+      if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
+        if self:canMove() then
+          self:setState('seek')
+          self.moveTimer = self.moveCooldown
+        end
+      end
     end
   end
 
-  if self.state == 'seek' then
-    --self:seek(Game.player)
-    self:moveToAttackRange(Game.player)
-  end
-
-  if self.state == 'fire' then
-    -- Stop moving and shoot
-    self.vel = Vec2(0,0)
-    self:fireAt(Game.player, dt)
-
-    -- If we the player moves away, chase him!
-    if self.pos:dist2(Game.player.pos) > ATTACK_RANGE * ATTACK_RANGE then
-      if self:canMove() then
-        self:setState('seek')
-        self.moveTimer = self.moveCooldown
-      end
+  if self.ori.x > 0 then
+    if not self.flip then
+      self.anim:flipH()
+      self.flip = true
+    end
+  else
+    if self.flip == true then
+      self.anim:flipH()
+      self.flip = false
     end
   end
 
@@ -167,6 +186,7 @@ function Enemy:takeDamage(dmg)
     self:setAnim('idleImpact')
     self.hitAnim = true
     self.hitTimer = HIT_DELAY
+    if self.state == 'idle' then self:setState('seek') end
   elseif self.state == 'running' or 'seek' then
     self:setAnim('runningImpact')
     self.hitAnim = true
@@ -207,6 +227,7 @@ end
 
 function Enemy:moveToAttackRange(target)
   local dir = target.pos - self.pos
+  self.ori = dir:normalize()
   local dist = dir:len()
 
   if dist < ATTACK_RANGE then --and self:canMove() then
