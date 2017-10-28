@@ -15,11 +15,12 @@ local BULLET_POWER = 3
 local b_sprite= nil
 local impact_anim = nil
 
-local function adjustForAccuracy(target, acc)
-  return Vec2(
-    floor(rand(target.x * acc, target.x * (1 + (1 - acc)))),
-    floor(rand(target.y * acc, target.y * (1 + (1 - acc))))
-  )
+
+local function adjustForAccuracy(ori, acc)
+  local a = math.rad((100 - (100 * acc)))
+  local r = math.atan2(ori.y, ori.x)
+  r = rand(r - a, r + a)
+  return Vec2(math.cos(r), math.sin(r))
 end
 
 function Projectile:initialize(parent, origin, target, accuracy)
@@ -34,11 +35,11 @@ function Projectile:initialize(parent, origin, target, accuracy)
   end
 
   local accuracy = accuracy or 1
-  local target = adjustForAccuracy(target, accuracy)
 
-  self.ori = (target - origin):normalize()
+  local dir = (target - origin):normalize()
+  self.ori = adjustForAccuracy(dir, accuracy)
 
-  self.vel = (target - origin):normalize() * BULLET_SPEED
+  self.vel = self.ori * BULLET_SPEED
   self.rot = origin:angleTo(target)
 
   self.isDead = false
