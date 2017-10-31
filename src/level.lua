@@ -160,8 +160,8 @@ function Level:buildWalls(room)
   end
 
   local wall_t = {}
-  assert(y > 0 and x > 0 and x + w <= self.tilemap.w and y + h <= self.tilemap.h,
-  string.format('%d, %d, %d, %d', x, y, x + w, y + h))
+  --assert(y > 0 and x > 0 and x + w <= self.tilemap.w and y + h <= self.tilemap.h,
+  --string.format('%d, %d, %d, %d', x, y, x + w, y + h))
 
   local top = new_wall('top', x, y, 0, 1)
 

@@ -12,6 +12,7 @@ Bump     = require 'lib.bump'
 -- The Atlas is where I store all my assets and data.
 Atlas = require 'atlas'
 CloverCam = require 'clovercam'
+log = require 'log'
 Vec2  = require 'vec2'
 
 -- Non-Global Modules
@@ -32,6 +33,10 @@ local OPERATING_SYSTEM = nil
 -- Program State Globals
 DEBUG_MODE     = false
 SOUND_ENABLED  = false
+
+DISABLE_LOGS   = false
+NEW_LOG_FILE   = true
+PRINT_LOGS     = true
 
 -- Options for gif recording
 local AUTO_BUILD_GIF = true
@@ -57,8 +62,10 @@ local font
 
 function love.load()
   lg.setDefaultFilter('nearest', 'nearest')
-  love.math.setRandomSeed(1234567)--os.time())
---  love.math.setRandomSeed(os.time()) 
+  --love.math.setRandomSeed(1234567)--os.time())
+  local seed = os.time()
+  love.math.setRandomSeed(seed)
+  log("GameSeed: ", seed)
   Atlas:loadAssets()
   initWindow()
 
@@ -70,7 +77,6 @@ function love.load()
   Game.world = Bump.newWorld(CELL_SIZE)
   map = Map:new(Game.camera, game_w, game_h)
   map:setup()
-  
   
   Game.player = Hero:new(game_w/2, game_h/2)
   --Enemy:new('xeno', Game.player.pos.x, Game.player.pos.y - 300)

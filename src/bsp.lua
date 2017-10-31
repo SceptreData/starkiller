@@ -88,6 +88,26 @@ function BSP:split(iter, child)
 end
 
 
+function BSP:split2(iter, child)
+  local root = Tree(self)
+  if not child then root.levels = iter + 1 end
+  local s = {root}
+  while #s > 0 do
+    local node = table.remove(s)
+    if iter > 0 then 
+      local left, right = randomSplit(node)
+      node.children[1] = Tree(left)
+      node.children[2] = Tree(right)
+      table.insert(s, node.children[1])
+      table.insert(s, node.children[2])
+    end
+  end
+end
+
+
+
+
+
 function BSP.buildRooms(tree, lvl)
   local lvl = lvl or tree.levels
   local ends = tree:getLevel(lvl)

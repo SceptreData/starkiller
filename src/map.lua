@@ -24,7 +24,8 @@ function Map:initialize(camera, w, h)
 end
 
 function Map:setup()
-  cur_level = LevelGen.bspLevel(1, self.w, self.h, 3, 0.5, 0.3)
+  cur_level = LevelGen.bspLevel(1, self.w, self.h, 3)
+  --cur_level = LevelGen.bspLevel(1, self.w, self.h, 3, 0.5, 0.3)
   --cur_level = LevelGen.debugSquare(self.w, self.h)
 end
 
